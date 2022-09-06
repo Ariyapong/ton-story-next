@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import CakeIcon from '~icons/heroicons-solid/cake.jsx'
 
 export default function Home() {
   return (
@@ -14,13 +15,15 @@ export default function Home() {
         </h1>
 
         <p className="description tw-text-3xl tw-font-bold tw-underline tw-text-red-600">
-          Get started by editing <code>pages/index.js dai lei</code>
+          Get started by editing <code>pages/index.js </code>
         </p>
+        
 
         <div className="grid">
           <a href="https://nextjs.org/docs" className="card">
             <h3>Documentation &rarr;</h3>
             <p>Find in-depth information about Next.js features and API.</p>
+            <CakeIcon />
           </a>
 
           <a href="https://nextjs.org/learn" className="card">
