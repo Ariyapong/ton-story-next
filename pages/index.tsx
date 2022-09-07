@@ -1,7 +1,20 @@
-import Head from 'next/head'
-import CakeIcon from '~icons/heroicons-solid/cake.jsx'
+import Head from "next/head";
+import CakeIcon from "~icons/heroicons-solid/cake.jsx";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { increment, incrementAsync } from "store/features/counter/counterSlice";
+
+import { AppDispatch } from "store";
 
 export default function Home() {
+  const counterVal = useSelector((state: any) => state.counter.value);
+  const dispatch: AppDispatch = useDispatch();
+  const incrementValue = Number("2") || 0;
+
+  useEffect(() => {
+    console.log("counterVal : ", counterVal);
+  }, [counterVal]);
+
   return (
     <div className="container">
       <Head>
@@ -11,13 +24,16 @@ export default function Home() {
 
       <main>
         <h1 className="title">
-          Welcome to <a href="https://nextjs.org" >Next.js!</a>
+          Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
         <p className="description tw-text-3xl tw-font-bold tw-underline tw-text-red-600">
           Get started by editing <code>pages/index.js </code>
         </p>
-        
+        <button onClick={() => dispatch(increment())}>incremental</button>
+        <button onClick={() => dispatch(incrementAsync(incrementValue))}>
+          incrementAsync
+        </button>
 
         <div className="grid">
           <a href="https://nextjs.org/docs" className="card">
@@ -57,8 +73,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel" className="logo" />
+          Powered by <img src="/vercel.svg" alt="Vercel" className="logo" />
         </a>
       </footer>
 
@@ -208,5 +223,5 @@ export default function Home() {
         }
       `}</style>
     </div>
-  )
+  );
 }
