@@ -1,5 +1,6 @@
 import Head from "next/head";
 import CakeIcon from "~icons/heroicons-solid/cake.jsx";
+import CakeBD from "~icons/heroicons-solid/cake";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { increment, incrementAsync } from "store/features/counter/counterSlice";
@@ -13,6 +14,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log("counterVal : ", counterVal);
+    console.log("theme : ", window.__theme);
   }, [counterVal]);
 
   return (
@@ -20,6 +22,7 @@ export default function Home() {
       <Head>
         <title>Create Next App EIEI</title>
         <link rel="icon" href="/favicon.ico" />
+        <meta name="color-scheme" content="dark light" />
       </Head>
 
       <main>
@@ -39,7 +42,8 @@ export default function Home() {
           <a href="https://nextjs.org/docs" className="card">
             <h3>Documentation &rarr;</h3>
             <p>Find in-depth information about Next.js features and API.</p>
-            <CakeIcon />
+            {/* <CakeIcon /> */}
+            {/* <CakeBD /> */}
           </a>
 
           <a href="https://nextjs.org/learn" className="card">
