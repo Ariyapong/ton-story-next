@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { increment, incrementAsync } from "store/features/counter/counterSlice";
 
 import { AppDispatch } from "store";
+import BaseButton from "@/components/atoms/Button";
 
 export default function Home() {
   const counterVal = useSelector((state: any) => state.counter.value);
@@ -42,9 +43,10 @@ export default function Home() {
           <a href="https://nextjs.org/docs" className="card">
             <h3>Documentation &rarr;</h3>
             <p>Find in-depth information about Next.js features and API.</p>
-            {/* <CakeIcon /> */}
-            {/* <CakeBD /> */}
+            <CakeIcon />
+            <CakeBD />
           </a>
+          <BaseButton disabled={true}>Test toggle</BaseButton>
 
           <a href="https://nextjs.org/learn" className="card">
             <h3>Learn &rarr;</h3>
