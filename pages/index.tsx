@@ -18,6 +18,15 @@ export default function Home() {
     console.log("theme : ", window.__theme);
   }, [counterVal]);
 
+  const handleSwitchTheme = () => {
+    console.log("switch theme : ", window.__theme);
+    if (window.__theme === "dark") {
+      window.__setPreferredTheme("light");
+    } else {
+      window.__setPreferredTheme("dark");
+    }
+  };
+
   return (
     <div className="container">
       <Head>
@@ -46,7 +55,9 @@ export default function Home() {
             <CakeIcon />
             <CakeBD />
           </a>
-          <BaseButton disabled={true}>Test toggle</BaseButton>
+          <BaseButton disabled={false} eventClick={handleSwitchTheme}>
+            Test toggle
+          </BaseButton>
 
           <a href="https://nextjs.org/learn" className="card">
             <h3>Learn &rarr;</h3>

@@ -6,16 +6,21 @@ const BaseButton: NextComponentType = (props: any) => {
   let ref = useRef();
   let { buttonProps } = useButton(props, ref);
   const classBtn = props.btnClassName ? props.btnClassName : "";
+  console.log("buttonProps : ", props);
+  const { eventClick } = props;
   return (
-    <button
-      {...buttonProps}
-      aria-label="action-button"
-      className={`tw-text-red-600 tw-font-bold ${classBtn}`}
-      disabled={props.disabled}
-      ref={ref}
-    >
-      {props.children}
-    </button>
+    props && (
+      <button
+        {...buttonProps}
+        aria-label="action-button"
+        className={`tw-text-red-600 tw-font-bold ${classBtn}`}
+        disabled={props.disabled}
+        ref={ref}
+        onClick={eventClick}
+      >
+        {props.children}
+      </button>
+    )
   );
 };
 
