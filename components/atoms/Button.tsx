@@ -6,7 +6,7 @@ const BaseButton: NextComponentType = (props: any) => {
   let ref = useRef();
   let { buttonProps } = useButton(props, ref);
   const classBtn = props.btnClassName ? props.btnClassName : "";
-  console.log("buttonProps : ", props);
+  // console.log("buttonProps : ", props);
   const { eventClick } = props;
   return (
     props && (
