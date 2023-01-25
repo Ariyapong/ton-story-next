@@ -20,6 +20,8 @@
     "axios": "^0.27.2",
     "dayjs": "^1.11.5",
     "next": "^13.1.1",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-preset-env": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.2",

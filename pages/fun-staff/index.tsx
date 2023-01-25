@@ -1,3 +1,4 @@
+import style from "./FunStaff.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { AppDispatch } from "store";
@@ -11,25 +12,8 @@ export default function FunStaff(props) {
   }, []);
 
   return (
-    <div className="container">
-      <div>hello world FunStaff</div>
-
-      <style jsx>{``}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
+    <div className={style.container}>
+      <div className={style.text}>hello world FunStaff</div>
     </div>
   );
 }

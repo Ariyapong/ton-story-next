@@ -30,13 +30,7 @@ export default function Home() {
   return (
     <div className="container">
       <div>hello world</div>
-
-      <style jsx>{`
-        .test-color {
-        }
-      `}</style>
-
-      <style jsx global>{`
+      {/* <style jsx global>{`
         html,
         body {
           padding: 0;
@@ -49,7 +43,7 @@ export default function Home() {
         * {
           box-sizing: border-box;
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 }
