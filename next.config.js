@@ -16,6 +16,6 @@ module.exports = async (phase, { defaultConfig }) => {
       return config;
     },
   };
-  console.log("check next config : ", nextConfig);
+  // console.log("check next config : ", nextConfig);
   return nextConfig;
 };
