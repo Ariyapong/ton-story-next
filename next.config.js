@@ -1,4 +1,16 @@
-module.exports = async (phase, { defaultConfig }) => {
+const withMDX = require('@next/mdx')({
+  extension: /\.(md|mdx)$/,
+})
+// Optionally you can provide
+// const withMDX = require('@next/mdx')({
+//   options: {
+//     remarkPlugins: [],
+//     rehypePlugins: [],
+//   },
+// })
+// module.exports = withMDX()
+
+module.exports = withMDX(async (phase, { defaultConfig }) => {
   /**
    * @type {import('next').NextConfig}
    */
@@ -18,4 +30,4 @@ module.exports = async (phase, { defaultConfig }) => {
   };
   console.log("check next config : ", nextConfig);
   return nextConfig;
-};
+});

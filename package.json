@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
+    "@mdx-js/react": "^3.0.1",
     "@next/font": "^13.1.1",
+    "@next/mdx": "^14.1.1",
     "@react-aria/button": "^3.6.1",
     "@reduxjs/toolkit": "^1.8.5",
     "@tanstack/react-query": "^5.24.8",
