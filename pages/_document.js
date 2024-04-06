@@ -9,7 +9,8 @@ export default function Document() {
         <Main />
         <NextScript />
         {/* strategy="afterInteractive" */}
-        <Script id="them-script" strategy="lazyOnload">
+        {/* <Script id="them-script" strategy="lazyOnload"> */}
+        <Script id="them-script" strategy="afterInteractive">
           {`// Add dark / light detection that runs before next load
             (function() {
               window.__onThemeChange = function() {};

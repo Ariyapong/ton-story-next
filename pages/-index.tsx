@@ -52,8 +52,8 @@ export default function Home() {
           <a href="https://nextjs.org/docs" className="card">
             <h3>Documentation &rarr;</h3>
             <p>Find in-depth information about Next.js features and API.</p>
-            <CakeIcon />
-            <CakeBD />
+           {/*  <CakeIcon />
+            <CakeBD /> */}
           </a>
           <BaseButton disabled={false} eventClick={handleSwitchTheme}>
             Test toggle
