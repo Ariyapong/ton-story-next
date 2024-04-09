@@ -16,6 +16,7 @@ export default function FunStaff(props) {
     <div className={style.container}>
       <div className={style.text}>hello world FunStaff</div>
       <ThemeSwitcher />
+      <h3 className="tw-text-xl">Test eiei</h3>
       {/* <BaseButton disabled={false} eventClick={handleSwitchTheme}>
         Test toggle
       </BaseButton> */}

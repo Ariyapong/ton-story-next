@@ -23,19 +23,30 @@
       "@@/*": [
         ".*"
       ],
-      "@/components/*": ["components/*"],
-      "~style/*": ["assets/styles/*"]
+      "@/components/*": [
+        "components/*"
+      ],
+      "~style/*": [
+        "assets/styles/*"
+      ]
     },
     "types": [
-      "unplugin-icons/types/react",
-    ]
+      "unplugin-icons/types/react"
+    ],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
-  ],
+  ]
 }

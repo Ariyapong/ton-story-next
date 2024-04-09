@@ -1,0 +1,8 @@
+.container {
+  /* color: blue; */
+  .text {
+    /* color: red; */
+    font-weight: bold;
+    /* background-color: yellow; */
+  }
+}
