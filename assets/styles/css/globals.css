@@ -43,3 +43,34 @@ body {
     --text-color: var(--dark-brown-color);
   }
 }
+/* blue print for screen size detection */
+/* element render offscreen */
+.screen-indicator {
+  position: absolute;
+  top: -999em;
+  left: -999em;
+}
+.screen-indicator:before {
+  content: 'desktop';
+}
+
+/* small desktop */
+@media all and (max-width: 1199px) {
+  .screen-indicator:before {
+      content: 'small-desktop';
+  }
+}
+
+/* tablet */
+@media all and (max-width: 1024px) {
+  .screen-indicator:before {
+      content: 'tablet';
+  }
+}
+
+/* mobile phone */
+@media all and (max-width: 767px) {
+  .screen-indicator:before {
+      content: 'mobile';
+  }
+}

@@ -29,6 +29,12 @@
       "#/utils/*": [
         "utils/*"
       ],
+      "#/plugins/*": [
+        "plugins/*"
+      ],
+      "#types/*": [
+        "types/*"
+      ],
       "~style/*": [
         "assets/styles/*"
       ]

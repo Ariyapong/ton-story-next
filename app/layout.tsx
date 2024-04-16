@@ -5,14 +5,16 @@ import type { AppProps } from "next/app";
 import Script from "next/script";
 import React from "react";
 import { Metadata } from "next";
-import { Providers } from "./providers";
+import { Providers } from "../providers/redux";
+import { ScreenProviders } from "../providers/screen";
 import { cookies } from "next/headers";
 import { Maitree as FontSans } from "next/font/google";
 import { cn } from "#/utils/tw-utils";
+// import screenPlugins from '#/plugins/screen'
 
 const fontSans = FontSans({
   subsets: ["latin", "thai"],
-  weight: ["300", "400", "500","600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-sans",
 });
 
@@ -30,15 +32,26 @@ export default function RootLayout({
 }>) {
   const cookieStore = cookies();
   const theme = cookieStore.get("theme");
-  const { value } = theme || { value: "light" };
-  console.log("theme server", theme?.value);
+
+  // if (typeof window !== 'undefined') {
+  //   // Code is running on the client side
+  //   screenPlugins();
+  // }
+
+  // React.useEffect(()=> {
+  //   screenPlugins();
+  // }, [])
 
   return (
     <html lang="en">
-      <body data-theme={theme?.value} className={cn(
+      <body
+        data-theme={theme?.value}
+        id="page-view"
+        className={cn(
           "min-h-screen bg-background tw-font-sans tw-antialiased",
           fontSans.variable
-        )}>
+        )}
+      >
         <Script id="theme-script" strategy="afterInteractive">
           {`// Add dark / light detection that runs before next load
             (function() {
@@ -83,7 +96,11 @@ export default function RootLayout({
             })();
       `}
         </Script>
-        <Providers>{children}</Providers>
+        <Providers>
+          <ScreenProviders>
+            <main>{children}</main>
+          </ScreenProviders>
+        </Providers>
         {/* <NextScript /> */}
       </body>
     </html>
