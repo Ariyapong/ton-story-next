@@ -2,7 +2,6 @@ import "../assets/styles/css/tw-main.css";
 import "../assets/styles/css/globals.css";
 
 import type { AppProps } from "next/app";
-import { NextScript } from "next/document";
 import Script from "next/script";
 import React from "react";
 import { Metadata } from "next";
@@ -40,7 +39,7 @@ export default function RootLayout({
           "min-h-screen bg-background tw-font-sans tw-antialiased",
           fontSans.variable
         )}>
-        <Script id="theme-script" strategy="beforeInteractive">
+        <Script id="theme-script" strategy="afterInteractive">
           {`// Add dark / light detection that runs before next load
             (function() {
               window.__onThemeChange = function() {};
