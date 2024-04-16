@@ -20,11 +20,14 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@@/*": [
+      "##/*": [
         ".*"
       ],
-      "@/components/*": [
+      "#/components/*": [
         "components/*"
+      ],
+      "#/utils/*": [
+        "utils/*"
       ],
       "~style/*": [
         "assets/styles/*"

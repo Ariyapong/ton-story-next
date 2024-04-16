@@ -2,8 +2,8 @@ import style from "./FunStaff.module.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { AppDispatch } from "store";
-import BaseButton from "@/components/atoms/Button";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import BaseButton from "#/components/atoms/Button";
+import ThemeSwitcher from "#/components/ThemeSwitcher";
 
 export default function FunStaff(props) {
   // const dispatch: AppDispatch = useDispatch();

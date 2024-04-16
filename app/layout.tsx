@@ -8,13 +8,19 @@ import React from "react";
 import { Metadata } from "next";
 import { Providers } from "./providers";
 import { cookies } from "next/headers";
+import { Maitree as FontSans } from "next/font/google";
+import { cn } from "#/utils/tw-utils";
+
+const fontSans = FontSans({
+  subsets: ["latin", "thai"],
+  weight: ["300", "400", "500","600", "700"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Home",
   description: "Welcome to Ton Story",
 };
-
-
 
 export default function RootLayout({
   // Layouts must accept a children prop.
@@ -24,13 +30,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = cookies();
-  const theme = cookieStore.get('theme')
+  const theme = cookieStore.get("theme");
   const { value } = theme || { value: "light" };
-console.log("theme server", theme?.value);
+  console.log("theme server", theme?.value);
 
   return (
     <html lang="en">
-      <body data-theme={theme?.value}>
+      <body data-theme={theme?.value} className={cn(
+          "min-h-screen bg-background tw-font-sans tw-antialiased",
+          fontSans.variable
+        )}>
         <Script id="theme-script" strategy="beforeInteractive">
           {`// Add dark / light detection that runs before next load
             (function() {
