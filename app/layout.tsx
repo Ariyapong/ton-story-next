@@ -10,7 +10,7 @@ import { ScreenProviders } from "../providers/screen";
 import { cookies } from "next/headers";
 import { Maitree as FontSans } from "next/font/google";
 import { cn } from "#/utils/tw-utils";
-// import screenPlugins from '#/plugins/screen'
+import Header from '#/components/Header'
 
 const fontSans = FontSans({
   subsets: ["latin", "thai"],
@@ -96,11 +96,12 @@ export default function RootLayout({
             })();
       `}
         </Script>
-        <Providers>
-          <ScreenProviders>
+        <ScreenProviders>
+          <Providers>
+            <Header />
             <main>{children}</main>
-          </ScreenProviders>
-        </Providers>
+          </Providers>
+        </ScreenProviders>
         {/* <NextScript /> */}
       </body>
     </html>
