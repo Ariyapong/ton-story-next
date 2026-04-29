@@ -1,82 +1,56 @@
-// import { setScreenParams } from '#store/reducers/screen'
-import { ScreenPlugin } from '#types/screen-plugin'
-import * as rtk from '@reduxjs/toolkit'
+import type { ScreenPlugin } from "@/types/screen-plugin";
 
-export default function (store?: rtk.Store) {
-    // const { screenParam } = useSelector((state: RootState) => state.screen)
-    // const dispatch = useDispatch()
-    const existingElement = document.querySelector('.screen-indicator')
-    console.log("debug ::: ", existingElement)
-    if (existingElement) {
-        return
-    }
+type Listener = (screen: ScreenPlugin) => void;
 
-    let timeout: any = false
-    let delay = 250
-    let appWrapperElement: any = document.querySelector('#page-view')
-    let windowHeight = window.innerHeight
-    let windowWidth = window.innerWidth
+export default function screenPlugin(onChange?: Listener) {
+  if (typeof window === "undefined") return;
+  if (document.querySelector(".screen-indicator")) return;
 
-    // Create screen-indicator element
-    let indicator = document.createElement('div')
-    indicator.className = 'screen-indicator'
-    document.body.appendChild(indicator)
+  const appWrapper = document.querySelector<HTMLElement>("#page-view");
+  if (!appWrapper) return;
 
-    // Create a method which returns current device screen
-    function getDeviceState() {
-        const screenIndicator: any = document.querySelector('.screen-indicator')
-        const currentScreen: string = window.getComputedStyle(screenIndicator, ':before').getPropertyValue('content')
-        return currentScreen.replace(/\"/g, '')
-    }
+  const indicator = document.createElement("div");
+  indicator.className = "screen-indicator";
+  document.body.appendChild(indicator);
 
-    let screenSize = getDeviceState()
-    let userAgent = navigator.userAgent
-    let languages = navigator.languages
-    let clientWidth = appWrapperElement.clientWidth
-    let clientHeight = appWrapperElement.clientHeight
-    let screen: ScreenPlugin = {
-        windowHeight,
-        windowWidth,
-        clientWidth,
-        clientHeight,
-        screenSize,
-        userAgent,
-        languages,
-    }
+  const getDeviceState = (): string => {
+    const el = document.querySelector(".screen-indicator");
+    if (!el) return "desktop";
+    const value = window.getComputedStyle(el, "::before").getPropertyValue("content");
+    return value.replace(/"/g, "");
+  };
 
-    // init app min-height
-    appWrapperElement.style.minHeight = `${windowHeight}px`
-    appWrapperElement.style.setProperty('--app-height', `${windowHeight}px`)
+  const snapshot = (): ScreenPlugin => ({
+    windowHeight: window.innerHeight,
+    windowWidth: window.innerWidth,
+    clientWidth: appWrapper.clientWidth,
+    clientHeight: appWrapper.clientHeight,
+    screenSize: getDeviceState(),
+    userAgent: navigator.userAgent,
+    languages: navigator.languages,
+  });
 
-    // init screen params
-    // store.dispatch(setScreenParams(screen))
+  const apply = (screen: ScreenPlugin) => {
+    appWrapper.style.minHeight = `${screen.windowHeight}px`;
+    appWrapper.style.setProperty("--app-height", `${screen.windowHeight}px`);
+    onChange?.(screen);
+  };
 
-    window.addEventListener('resize', () => {
-        clearTimeout(timeout)
-        timeout = setTimeout(() => {
-            let screenSize = getDeviceState()
-            let userAgent = navigator.userAgent
-            let languages = navigator.languages
-            let windowWidth = window.innerWidth
-            let windowHeight = window.innerHeight
-            let clientWidth = appWrapperElement.clientWidth
-            let clientHeight = appWrapperElement.clientHeight
-            let screen = {
-                windowHeight,
-                windowWidth,
-                clientWidth,
-                clientHeight,
-                screenSize,
-                userAgent,
-                languages,
-            }
+  apply(snapshot());
 
-            // update app min-height
-            appWrapperElement.style.minHeight = `${windowHeight}px`
-            appWrapperElement.style.setProperty('--app-height', `${windowHeight}px`)
-            
-            // update screen params
-            // store.dispatch(setScreenParams(screen))
-        }, delay)
-    })
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  const delay = 250;
+
+  const handleResize = () => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => apply(snapshot()), delay);
+  };
+
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+    if (timeout) clearTimeout(timeout);
+    indicator.remove();
+  };
 }

@@ -1,108 +1,42 @@
-import "../assets/styles/css/tw-main.css";
-import "../assets/styles/css/globals.css";
+import "./globals.css";
 
-import type { AppProps } from "next/app";
-import Script from "next/script";
-import React from "react";
-import { Metadata } from "next";
-import { Providers } from "../providers/redux";
-import { ScreenProviders } from "../providers/screen";
-import { cookies } from "next/headers";
-import { Maitree as FontSans } from "next/font/google";
-import { cn } from "#/utils/tw-utils";
-import Header from '#/components/Header'
+import type { Metadata } from "next";
+import { Maitree } from "next/font/google";
 
-const fontSans = FontSans({
+import { Header } from "@/components/header";
+import { ScreenProvider } from "@/providers/screen";
+import { ThemeProvider } from "@/providers/theme";
+import { cn } from "@/lib/utils";
+
+const fontSans = Maitree({
   subsets: ["latin", "thai"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "Home",
-  description: "Welcome to Ton Story",
+  title: {
+    default: "Ton Story",
+    template: "%s — Ton Story",
+  },
+  description: "Tony's portfolio and blog.",
 };
 
 export default function RootLayout({
-  // Layouts must accept a children prop.
-  // This will be populated with nested layouts or pages
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const cookieStore = cookies();
-  const theme = cookieStore.get("theme");
-
-  // if (typeof window !== 'undefined') {
-  //   // Code is running on the client side
-  //   screenPlugins();
-  // }
-
-  // React.useEffect(()=> {
-  //   screenPlugins();
-  // }, [])
-
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        data-theme={theme?.value}
         id="page-view"
-        className={cn(
-          "min-h-screen bg-background tw-font-sans tw-antialiased",
-          fontSans.variable
-        )}
+        className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}
       >
-        <Script id="theme-script" strategy="afterInteractive">
-          {`// Add dark / light detection that runs before next load
-            (function() {
-              window.__onThemeChange = function() {};
-              
-              function getCookie(name) {
-                const value = "; " + document.cookie;
-                const parts = value.split("; " + name+"=");
-                if (parts.length === 2) return parts.pop().split(';').shift();
-              }
-              
-              function setTheme(newTheme) {
-                console.log("debug setTheme :::::", newTheme);
-                window.__theme = newTheme;
-                preferredTheme = newTheme;
-                document.body.setAttribute("data-theme", newTheme);
-                window.__onThemeChange(newTheme);
-              }
-
-              var preferredTheme;
-              try {
-                preferredTheme = getCookie('theme');
-                console.log(" preferredTheme theme-script  :::::", preferredTheme);
-              } catch (err) {
-                console.error(err);
-              }
-
-              window.__setPreferredTheme = function(newTheme) {
-                console.log("theme-script :::::", newTheme);
-                setTheme(newTheme);
-                try {
-                  document.cookie="theme=" + newTheme + ";" + "expires="
-                } catch (err) {}
-              };
-
-              var darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
-              darkQuery.addListener(function(e) {
-                window.__setPreferredTheme(e.matches ? "dark" : "light");
-              });
-              console.log("before set preferredTheme :::::", preferredTheme);
-              setTheme(preferredTheme || (darkQuery.matches ? "dark" : "light"));
-            })();
-      `}
-        </Script>
-        <ScreenProviders>
-          <Providers>
+        <ThemeProvider>
+          <ScreenProvider>
             <Header />
-            <main>{children}</main>
-          </Providers>
-        </ScreenProviders>
-        {/* <NextScript /> */}
+            <main className="mx-auto max-w-5xl px-4 py-10">{children}</main>
+          </ScreenProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
