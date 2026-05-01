@@ -1,16 +1,28 @@
 import type { Metadata, Viewport } from "next";
 
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Ton Story · ต้นสตอรี่",
+    default: SITE_NAME,
     template: "%s — Ton Story",
   },
-  description: "Ariyapong Wongmaneerat (Tony) — senior software developer in Bangkok. Portfolio + bilingual blog.",
+  description: SITE_DESCRIPTION,
   authors: [{ name: "Ariyapong Wongmaneerat" }],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Ton Story · ต้นสตอรี่",
+    title: SITE_NAME,
     description: "Tony's portfolio + bilingual blog.",
     type: "website",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
   },
 };
 

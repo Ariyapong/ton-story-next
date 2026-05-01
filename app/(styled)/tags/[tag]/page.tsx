@@ -23,6 +23,7 @@ export async function generateMetadata({
   return {
     title: `#${decoded} · ${tagTh(decoded)}`,
     description: `Posts tagged #${decoded}.`,
+    alternates: { canonical: `/tags/${encodeURIComponent(decoded)}` },
   };
 }
 
