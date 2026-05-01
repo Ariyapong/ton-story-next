@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Tony — Bio",
-  description: "Ariyapong Wongmaneerat (Tony) — Senior Software Developer, Bangkok.",
+  description: "Ariyapong Wimolnoch (Tony) — Senior Software Developer, Bangkok.",
 };
 
 const easterEggScript = `
@@ -36,18 +36,19 @@ const easterEggScript = `
 export default function UnstyledBioPage() {
   return (
     <>
-      <h1>Ariyapong Wongmaneerat</h1>
+      <h1>Hellow there, welcome to my website</h1>
+      <h2>My name is Ariyapong Wimolnoch</h2>
       <p>
         <b>Nickname:</b> Tony (or Ton)
       </p>
       <p>
-        <b>Role:</b> Senior Software Developer
+        <b>Role:</b> Software Developer
       </p>
       <p>
         <b>Based in:</b> Bangkok, Thailand
       </p>
       <p>
-        <b>Currently at:</b> [Work Company]
+        <b>Currently at:</b> AXONS Tech (CPF)
       </p>
 
       <h2>What I do</h2>
@@ -77,6 +78,10 @@ export default function UnstyledBioPage() {
           <a href="https://github.com/Ariyapong">github.com/Ariyapong</a>
         </li>
         <li>
+          Medium:{" "}
+          <a href="https://medium.com/@arthony">medium.com/@arthony</a>
+        </li>
+        <li>
           Email:{" "}
           <a href="mailto:ariyapongw.ton@gmail.com">ariyapongw.ton@gmail.com</a>
         </li>
@@ -86,20 +91,27 @@ export default function UnstyledBioPage() {
 
       <p>
         <small>
-          Yes, this page has zero CSS on purpose. Every other page is properly
-          designed, I promise.{" "}
+          {/* Yes, this page has zero CSS on purpose. Every other page is properly
+          designed, I promise.{" "} */}
+
+          Yes, This page is beautifully crafted with ❤️ <br/>
+          See other pages here.{" "}
+          {/* Hard nav (plain <a>) so the unstyled / stays unstyled when the
+              browser comes back — styled CSS wouldn't unload after a soft nav. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/blog">Read the blog</a> ·{" "}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/projects">See projects</a> · <a href="/about">About</a>
+          <a href="/projects">See projects</a> ·{" "}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/about">About</a>
         </small>
       </p>
 
-      <p>
+      {/* <p>
         <small>
           <i>(View source. The whole document is one tiny file. That&apos;s the joke.)</i>
         </small>
-      </p>
+      </p> */}
 
       <script dangerouslySetInnerHTML={{ __html: easterEggScript }} />
     </>

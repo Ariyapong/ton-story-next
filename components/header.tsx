@@ -25,25 +25,37 @@ export function Header() {
   return (
     <header className="theme-fade sticky top-0 z-40 w-full border-b border-rule bg-background/85 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-baseline justify-between gap-4 px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-baseline gap-2 hover-lift">
+        {/* Logo points to the unstyled bio at /. Hard nav so styled CSS unloads. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/" className="flex items-baseline gap-2 hover-lift">
           <span className="font-serif text-xl italic">Ton Story</span>
           <span className="font-sans text-sm text-muted-foreground">· ต้นสตอรี่</span>
-        </Link>
+        </a>
 
         <nav className="hidden items-baseline gap-6 md:flex">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
+            const className = cn(
+              "hover-lift font-sans text-[11px] uppercase tracking-[0.18em]",
+              active
+                ? "border-b border-foreground pb-1 text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            );
+            // "/" is the unstyled bio — hard nav so styled CSS unloads.
+            if (item.href === "/") {
+              return (
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a key={item.href} href="/" title={item.th} className={className}>
+                  {item.en}
+                </a>
+              );
+            }
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 title={item.th}
-                className={cn(
-                  "hover-lift font-sans text-[11px] uppercase tracking-[0.18em]",
-                  active
-                    ? "border-b border-foreground pb-1 text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
+                className={className}
               >
                 {item.en}
               </Link>
@@ -76,22 +88,32 @@ function MobileNav({ pathname }: { pathname: string }) {
       <ul className="absolute right-0 mt-3 min-w-44 rounded-md border border-rule bg-card p-2 shadow-lg">
         {NAV.map((item) => {
           const active = isActive(pathname, item.href);
+          const className = cn(
+            "flex items-baseline justify-between gap-3 rounded px-2 py-1.5 font-sans text-[11px] uppercase tracking-[0.18em]",
+            active
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground",
+          );
+          const inner = (
+            <>
+              <span>{item.en}</span>
+              <span className="text-[10px] normal-case tracking-normal text-muted-foreground">
+                {item.th}
+              </span>
+            </>
+          );
           return (
             <li key={item.href}>
-              <Link
-                href={item.href}
-                className={cn(
-                  "flex items-baseline justify-between gap-3 rounded px-2 py-1.5 font-sans text-[11px] uppercase tracking-[0.18em]",
-                  active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <span>{item.en}</span>
-                <span className="text-[10px] normal-case tracking-normal text-muted-foreground">
-                  {item.th}
-                </span>
-              </Link>
+              {item.href === "/" ? (
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a href="/" className={className}>
+                  {inner}
+                </a>
+              ) : (
+                <Link href={item.href} className={className}>
+                  {inner}
+                </Link>
+              )}
             </li>
           );
         })}
