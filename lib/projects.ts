@@ -7,7 +7,9 @@ const PROJECTS_DIR = path.join(process.cwd(), "content", "projects");
 export interface ProjectFrontmatter {
   title: string;
   summary: string;
+  summaryTh?: string;
   date?: string;
+  year?: string;
   stack?: string[];
   link?: string;
   repo?: string;
@@ -43,7 +45,9 @@ export function getProjectBySlug(slug: string): Project | null {
     slug: realSlug,
     title: fm.title ?? realSlug,
     summary: fm.summary ?? "",
+    summaryTh: fm.summaryTh,
     date: fm.date,
+    year: fm.year ?? (fm.date ? fm.date.slice(2, 4) : undefined),
     stack: fm.stack,
     link: fm.link,
     repo: fm.repo,

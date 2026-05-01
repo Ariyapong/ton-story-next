@@ -1,0 +1,35 @@
+---
+title: "Rebuilding this site with MDX in Next 15"
+titleTh: "รื้อสร้างเว็บนี้ใหม่ด้วย MDX บน Next 15"
+date: "2026-04-09"
+excerpt: "Tearing down the starter scaffolding. What I kept, what I threw out."
+excerptTh: "รื้อโครงตั้งต้นทิ้ง เก็บอะไรไว้ ทิ้งอะไรไป"
+tags: ["next.js", "mdx", "meta"]
+---
+
+I tore down the old starter scaffolding and rebuilt this site on Next 15,
+React 19, and Tailwind v4. Posts live in MDX so I can mix prose with React
+components when a paragraph isn't enough.
+
+ผมรื้อโครงสร้างตั้งต้นเดิมทิ้ง แล้วสร้างเว็บนี้ใหม่บน Next 15, React 19
+และ Tailwind v4 บทความเก็บเป็น MDX เพื่อให้ผมสามารถผสมเนื้อหากับคอมโพเนนต์
+React ได้เมื่อย่อหน้าเดียวไม่พอ
+
+## What I kept
+
+- File-system content: `content/blog/*.mdx`, `content/projects/*.mdx`
+- `next-themes` for **light / dark / sepia**
+- The plain `gray-matter` + `next-mdx-remote/rsc` pipeline
+
+## What I threw out
+
+- The shadcn HSL slate palette (replaced with paper-warm tokens)
+- A single `--font-sans` (replaced with serif/sans/mono trio)
+- Anything I wasn't actually using
+
+```bash
+pnpm dev   # http://localhost:5174
+```
+
+The whole point of writing in MDX is that the page is the data. No CMS, no
+build step beyond `next build`, no second source of truth.

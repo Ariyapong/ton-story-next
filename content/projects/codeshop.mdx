@@ -1,0 +1,17 @@
+---
+title: "Online Codeshop"
+summary: "In-house tool for issuing and redeeming e-codes in store."
+summaryTh: "เครื่องมือภายในสำหรับออกและใช้ e-code ที่หน้าร้าน"
+date: "2024-06-15"
+year: "24"
+stack: ["Vue", "TypeScript", "Quasar"]
+---
+
+A focused two-screen application: cashier issues a code, customer redeems it.
+Most of the work was making the failure modes obvious — disconnected
+register, duplicate scan, expired code.
+
+## Constraint
+
+Had to run reliably on tablets older than the project itself. Smaller bundle,
+fewer dependencies, no animation that wasn't load-bearing.

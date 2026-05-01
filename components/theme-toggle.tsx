@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Moon, Sun, BookOpen } from "lucide-react";
+
+import { CoffeeCup } from "@/components/coffee-cup";
 
 const ORDER = ["light", "dark", "sepia"] as const;
+type ThemeName = (typeof ORDER)[number];
+
+const LABELS: Record<ThemeName, { en: string; th: string }> = {
+  light: { en: "light", th: "สว่าง" },
+  dark: { en: "dark", th: "มืด" },
+  sepia: { en: "sepia", th: "ซีเปีย" },
+};
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -12,31 +20,34 @@ export function ThemeToggle() {
 
   useEffect(() => setMounted(true), []);
 
-  const current = (theme === "system" ? resolvedTheme : theme) ?? "light";
+  const current = ((theme === "system" ? resolvedTheme : theme) ?? "light") as ThemeName;
 
   const handleClick = () => {
-    const idx = ORDER.indexOf(current as (typeof ORDER)[number]);
-    const next = ORDER[(idx + 1) % ORDER.length];
-    setTheme(next);
+    const idx = ORDER.indexOf(current);
+    setTheme(ORDER[(idx + 1) % ORDER.length]);
   };
 
   return (
     <button
       type="button"
-      aria-label="Toggle theme"
+      aria-label={`Theme: ${current}. Click to cycle.`}
       onClick={handleClick}
-      className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+      className="hover-lift inline-flex items-center gap-1.5 rounded-full border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
     >
       {mounted ? (
         <>
-          {current === "light" && <Sun size={16} />}
-          {current === "dark" && <Moon size={16} />}
-          {current === "sepia" && <BookOpen size={16} />}
-          <span className="capitalize">{current}</span>
+          <ThemeIcon current={current} />
+          <span>{LABELS[current].en}</span>
         </>
       ) : (
         <span className="opacity-0">theme</span>
       )}
     </button>
   );
+}
+
+function ThemeIcon({ current }: { current: ThemeName }) {
+  if (current === "sepia") return <CoffeeCup size={11} />;
+  if (current === "dark") return <span aria-hidden>☾</span>;
+  return <span aria-hidden>☀</span>;
 }

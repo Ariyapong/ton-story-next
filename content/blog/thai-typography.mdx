@@ -1,0 +1,31 @@
+---
+title: "Designing Thai and English in one paragraph"
+titleTh: "การออกแบบไทย-อังกฤษในย่อหน้าเดียวกัน"
+date: "2026-03-26"
+excerpt: "Line-height, x-height, and the quiet violence of mixing scripts."
+excerptTh: "ความสูงบรรทัด ความสูง x และความรุนแรงเงียบ ๆ ของการผสมตัวอักษร"
+tags: ["design", "i18n", "typography"]
+---
+
+Pair a Latin serif with a Thai serif and *something* will fight you. The
+x-heights don't match. The line-height that breathes for English crushes the
+upper diacritics on ไ ใ. The italic that signals "voice" in English is just
+…blurry in Thai, because traditional Thai type doesn't italicise.
+
+จับคู่เซริฟอังกฤษกับเซริฟไทย แล้ว *สักอย่าง* จะมาขวางคุณ — ความสูง x ไม่เท่ากัน
+ระยะบรรทัดที่หายใจสำหรับอังกฤษจะบีบวรรณยุกต์ด้านบนของ ไ ใ ส่วนตัวเอียงที่
+สื่อ "น้ำเสียง" ในอังกฤษ ก็แค่ …เบลอ ในไทย เพราะอักษรไทยดั้งเดิมไม่มีตัวเอียง
+
+## The pair I landed on
+
+- **IBM Plex Serif** for Latin body
+- **IBM Plex Sans Thai Looped** for Thai body
+- Both designed under the same family system, so the rhythm survives the swap
+
+> The trick isn't picking pretty fonts. It's picking fonts that share a designer's intent.
+>
+> เคล็ดลับไม่ใช่การเลือกฟอนต์สวย ๆ มันคือการเลือกฟอนต์ที่แชร์เจตนาของผู้ออกแบบ
+
+I tune Thai paragraphs to `line-height: 1.78` (vs 1.65 for English) — that
+extra space gives Thai vowels above and below the baseline somewhere to live
+without crashing into the next line.

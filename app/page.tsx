@@ -1,81 +1,107 @@
-import Link from "next/link";
-import { getAllPosts } from "@/lib/blog";
-import { getAllProjects } from "@/lib/projects";
-import { formatDate } from "@/lib/format";
+// The unstyled bio.
+// Loaded under the minimal root layout — no globals.css, no fonts, no Tailwind.
+// What you see is the raw browser default. That's the joke.
 
-export default function HomePage() {
-  const recentPosts = getAllPosts().slice(0, 3);
-  const recentProjects = getAllProjects().slice(0, 3);
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Tony — Bio",
+  description: "Ariyapong Wongmaneerat (Tony) — Senior Software Developer, Bangkok.",
+};
+
+const easterEggScript = `
+  // After 8s, the quote gets a single inline style. Nothing else. Shhh.
+  setTimeout(function () {
+    var q = document.getElementById('quote');
+    if (q) q.style.fontFamily = 'cursive';
+  }, 8000);
+  // Type "ttt" anywhere → a tiny coffee cup appears next to the quote.
+  (function () {
+    var buf = '';
+    document.addEventListener('keydown', function (e) {
+      if (e.key && e.key.length === 1) buf = (buf + e.key).slice(-3);
+      if (buf === 'ttt') {
+        var q = document.getElementById('quote');
+        if (q && !document.getElementById('cup')) {
+          var s = document.createElement('span');
+          s.id = 'cup';
+          s.textContent = ' ☕';
+          q.appendChild(s);
+        }
+      }
+    });
+  })();
+`;
+
+export default function UnstyledBioPage() {
   return (
-    <div className="space-y-16">
-      <section className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Hi, I&apos;m Tony.</h1>
-        <p className="max-w-2xl text-muted-foreground">
-          I build software. This is where I share what I&apos;m working on and
-          what I&apos;m thinking about. Have a look around — or get in touch.
-        </p>
-      </section>
+    <>
+      <h1>Ariyapong Wongmaneerat</h1>
+      <p>
+        <b>Nickname:</b> Tony (or Ton)
+      </p>
+      <p>
+        <b>Role:</b> Senior Software Developer
+      </p>
+      <p>
+        <b>Based in:</b> Bangkok, Thailand
+      </p>
+      <p>
+        <b>Currently at:</b> [Work Company]
+      </p>
 
-      <section className="space-y-4">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">Recent posts</h2>
-          <Link
-            href="/blog"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            All posts →
-          </Link>
-        </div>
-        {recentPosts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No posts yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {recentPosts.map((post) => (
-              <li key={post.slug}>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="flex items-baseline justify-between gap-4 border-b border-border py-3 hover:bg-accent/40 -mx-2 px-2 rounded transition-colors"
-                >
-                  <span className="font-medium">{post.title}</span>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDate(post.date)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <h2>What I do</h2>
+      <p>
+        I build software for the web. Frontend mostly, but I&apos;ll happily wander
+        into backend, infra, or whatever the work needs. Lately: Next.js,
+        TypeScript, Tailwind, and a healthy amount of MDX.
+      </p>
 
-      <section className="space-y-4">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">Featured projects</h2>
-          <Link
-            href="/projects"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            All projects →
-          </Link>
-        </div>
-        {recentProjects.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No projects yet.</p>
-        ) : (
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {recentProjects.map((project) => (
-              <li
-                key={project.slug}
-                className="rounded-lg border border-border bg-card p-5 hover:bg-accent/40 transition-colors"
-              >
-                <Link href={`/projects/${project.slug}`} className="block space-y-2">
-                  <h3 className="font-semibold">{project.title}</h3>
-                  <p className="text-sm text-muted-foreground">{project.summary}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+      <h2>What I write about</h2>
+      <ul>
+        <li>Tech &amp; programming notes</li>
+        <li>Work — what I&apos;m building, what&apos;s breaking</li>
+        <li>Health &amp; everyday discipline</li>
+        <li>Hobbies, side quests, miscellany</li>
+      </ul>
+
+      <h2>A quote I keep coming back to</h2>
+      <blockquote id="quote">
+        &ldquo;When we lose our principle, we invite chaos.&rdquo;
+      </blockquote>
+
+      <h2>Find me</h2>
+      <ul>
+        <li>
+          GitHub:{" "}
+          <a href="https://github.com/Ariyapong">github.com/Ariyapong</a>
+        </li>
+        <li>
+          Email:{" "}
+          <a href="mailto:ariyapongw.ton@gmail.com">ariyapongw.ton@gmail.com</a>
+        </li>
+      </ul>
+
+      <hr />
+
+      <p>
+        <small>
+          Yes, this page has zero CSS on purpose. Every other page is properly
+          designed, I promise.{" "}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/blog">Read the blog</a> ·{" "}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/projects">See projects</a> · <a href="/about">About</a>
+        </small>
+      </p>
+
+      <p>
+        <small>
+          <i>(View source. The whole document is one tiny file. That&apos;s the joke.)</i>
+        </small>
+      </p>
+
+      <script dangerouslySetInnerHTML={{ __html: easterEggScript }} />
+    </>
   );
 }

@@ -1,0 +1,45 @@
+---
+title: "On principle, and chaos"
+titleTh: "ว่าด้วยหลักการ และความวุ่นวาย"
+date: "2026-04-18"
+excerpt: "A small rule I keep coming back to when work gets tangled — and what happens when I forget it."
+excerptTh: "กฎเล็ก ๆ ที่ผมหวนคิดถึงเสมอเมื่องานเริ่มยุ่งเหยิง — และสิ่งที่เกิดขึ้นเมื่อผมลืมมัน"
+tags: ["essay", "work"]
+---
+
+There's a quote on a sticky note above my monitor. It says: *"when we lose
+our principle, we invite chaos."* I used to think it was about ethics. It is,
+partly. But mostly it's about software.
+
+ผมมีโพสต์อิทแผ่นเล็ก ๆ แปะอยู่เหนือจอ มันเขียนว่า
+*"เมื่อใดที่เราละทิ้งหลักการ เมื่อนั้นเราเชิญความวุ่นวายเข้ามา"*
+ตอนแรกผมคิดว่ามันพูดถึงเรื่องจริยธรรม จริงอยู่ บางส่วน
+แต่ส่วนใหญ่มันคือเรื่องของซอฟต์แวร์ — โค้ดทุกฐานที่ผมเคยเห็นพังทลายล้วนพังในแบบเดียวกัน
+
+> The chaos doesn't arrive. It accumulates.
+>
+> ความวุ่นวายไม่ได้มาถึง มันสะสม
+
+ทุก ๆ codebase ที่ผมเคยทำงานด้วยและพังลง ล้วนพังในแบบเดียวกัน — การยอมจำนน
+เล็ก ๆ ร้อยครั้ง กฎที่ถูกงอในวันอังคาร ลืมในวันพฤหัส แทนที่ในวันศุกร์ด้วย
+`// TODO refactor`.
+
+## What "principle" looks like in code
+
+A principle is a small rule that's cheap to follow on a normal day, and
+expensive to break on a hard one. Things like:
+
+- One source of truth for any piece of state
+- Server boundaries are explicit, never implicit
+- The build either passes cleanly or doesn't ship
+
+```ts
+// Each rule is small. Each shortcut is small. Their sum is not.
+function shortcut(): never {
+  throw new Error("we'll fix this in v2");
+}
+```
+
+I don't keep these because they're elegant. I keep them because, on the third
+hard day in a row, I am too tired to make good decisions from scratch. The
+principle decides for me.
