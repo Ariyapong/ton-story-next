@@ -12,6 +12,26 @@ export const metadata: Metadata = {
     "Ariyapong Wongmaneerat (Tony) — senior software developer in Bangkok.",
 };
 
+// Type "ttt" anywhere → a tiny coffee cup appears next to the quote.
+// Mirrors the egg on /; same trigger, same payload, just on this page.
+const easterEggScript = `
+  (function () {
+    var buf = '';
+    document.addEventListener('keydown', function (e) {
+      if (e.key && e.key.length === 1) buf = (buf + e.key).slice(-3);
+      if (buf === 'ttt') {
+        var q = document.getElementById('quote');
+        if (q && !document.getElementById('cup')) {
+          var s = document.createElement('span');
+          s.id = 'cup';
+          s.textContent = ' ☕';
+          q.appendChild(s);
+        }
+      }
+    });
+  })();
+`;
+
 export default function AboutPage() {
   const recentPosts = getAllPosts().slice(0, 3);
   const featured = getAllProjects().filter((p) => p.featured);
@@ -90,7 +110,10 @@ export default function AboutPage() {
 
         <aside className="border-t border-rule pt-6 md:border-l md:border-t-0 md:pl-7 md:pt-0">
           <Eyebrow>From the desk · จากโต๊ะทำงาน</Eyebrow>
-          <blockquote className="mt-3 font-serif text-2xl italic leading-[1.3]">
+          <blockquote
+            id="quote"
+            className="mt-3 font-serif text-2xl italic leading-[1.3]"
+          >
             &ldquo;When we lose our principle, we invite chaos.&rdquo;
           </blockquote>
           <p className="mt-2 font-sans text-sm leading-[1.55] text-muted-foreground">
@@ -197,13 +220,17 @@ export default function AboutPage() {
       </section>
 
       <p>
-        <Link
+        {/* Hard nav (plain <a>) so the unstyled / loads fresh without styled CSS. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a
           href="/"
           className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
         >
           ← Back to the unstyled bio
-        </Link>
+        </a>
       </p>
+
+      <script dangerouslySetInnerHTML={{ __html: easterEggScript }} />
     </div>
   );
 }
