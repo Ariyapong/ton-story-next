@@ -15,7 +15,7 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-8">
       <header className="flex items-baseline justify-between border-b border-rule pb-5">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <Eyebrow>The catalogue · สารบัญงาน</Eyebrow>
           <h1 className="font-serif text-4xl font-medium italic md:text-5xl">
             Projects{" "}
@@ -23,6 +23,9 @@ export default function ProjectsPage() {
               ผลงาน
             </span>
           </h1>
+          <p className="font-sans text-sm leading-[1.55] text-muted-foreground">
+            Public side quests — the rest stay private.
+          </p>
         </div>
         <div className="font-mono text-[11px] text-muted-foreground">
           {projects.length} entries

@@ -41,7 +41,7 @@ export default function AboutPage() {
       <StickyNote
         hint={
           <>
-            (easter egg: try typing <code className="font-mono">ttt</code>)
+            (....: try typing <code className="font-mono">ttt</code> 😎)
           </>
         }
       >
@@ -68,9 +68,8 @@ export default function AboutPage() {
             the index; the writing is where I really live.
           </p>
           <p className="font-sans text-[15px] leading-[1.78] text-muted-foreground">
-            ผมเขียนโค้ดเพื่อเว็บ — ส่วนใหญ่เป็นฝั่ง frontend แต่ก็ตามงานไปได้
-            ทุกที่ หน้านี้เป็นเพียงสารบัญ งานเขียนคือที่ที่ผมอยู่จริง ๆ
-            ส่วนใหญ่เกี่ยวกับ Next.js, TypeScript และเรื่องเล็ก ๆ น้อย ๆ
+            ผมเขียนโค้ดสำหรับเว็บ — ส่วนใหญ่เป็นฝั่ง frontend แต่ก็ตามงานไปได้ทุกที่ที่จำเป็น หน้านี้เป็นเพียงสารบัญ งานเขียนคือที่ที่ผมอยู่จริง ๆ
+            ส่วนใหญ่เกี่ยวกับ Javascript, TypeScript, React.js, React Frameworks และเรื่องเล็ก ๆ น้อย ๆ
             ที่ผมเรียนรู้
           </p>
           <dl className="grid grid-cols-2 gap-y-3 border-t border-rule pt-5 font-sans text-sm">
@@ -85,7 +84,7 @@ export default function AboutPage() {
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Stack · เครื่องมือ
             </dt>
-            <dd>Next.js, TypeScript, Tailwind, MDX</dd>
+            <dd>Javascript, TypeScript, React.js, React Frameworks, Tailwind, MDX</dd>
             <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Find me · ติดต่อ
             </dt>
@@ -103,6 +102,15 @@ export default function AboutPage() {
                 className="underline decoration-accent decoration-1 underline-offset-4 hover:text-accent"
               >
                 email
+              </a>
+              {/* medium like in bio page*/}
+              <a
+                href="https://medium.com/@ariyapong"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-accent decoration-1 underline-offset-4 hover:text-accent"
+              >
+                medium
               </a>
             </dd>
           </dl>
