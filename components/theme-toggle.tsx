@@ -30,7 +30,7 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      aria-label={`Theme: ${current}. Click to cycle.`}
+      aria-label={mounted ? `Theme: ${current}. Click to cycle.` : "Toggle theme"}
       onClick={handleClick}
       className="hover-lift inline-flex items-center gap-1.5 rounded-full border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
     >
