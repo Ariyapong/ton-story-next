@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s — Ton Story",
   },
   description: SITE_DESCRIPTION,
-  authors: [{ name: "Ariyapong Wongmaneerat" }],
+  authors: [{ name: "Ariyapong Wimolnoch" }],
   alternates: { canonical: "/" },
   openGraph: {
     title: SITE_NAME,

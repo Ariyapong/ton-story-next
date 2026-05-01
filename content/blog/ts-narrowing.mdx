@@ -10,10 +10,15 @@ tags: ["typescript", "programming"]
 There are dozens of TypeScript narrowing tricks. I use five of them every
 day. The rest live in blog posts I bookmarked once and never opened again.
 
-มีเทคนิคการ narrow ใน TypeScript เป็นสิบ ๆ แบบ ผมใช้จริงแค่ 5 อย่าง
-ที่เหลือไปอยู่ในบล็อกที่ผม bookmark ไว้ครั้งเดียวแล้วไม่เปิดอีก
+The thing nobody tells you when you start with TypeScript is that 90% of
+the real work isn't *typing* things — it's *narrowing* them. You usually
+know what the type could be. The interesting part is convincing the
+compiler what it *is*, right here, on this line.
 
 ## 1. Discriminated unions
+
+This is the one I reach for first, every time. If a value can be in more
+than one shape, give each shape a literal tag. The compiler does the rest.
 
 ```ts
 type Result<T> =
@@ -26,7 +31,13 @@ function unwrap<T>(r: Result<T>): T {
 }
 ```
 
+Once you start seeing your domain as a union of cases tagged by a literal,
+half your runtime checks become compile-time checks. That's the win.
+
 ## 2. `in` for shape checks
+
+When you don't own the types and can't add a discriminator, fall back to
+`in`. It's pragmatic, not pretty.
 
 ```ts
 function area(s: { width: number; height: number } | { radius: number }) {
@@ -35,6 +46,57 @@ function area(s: { width: number; height: number } | { radius: number }) {
 }
 ```
 
-The other three (assertion functions, type predicates, `satisfies`) are also
-worth knowing — but if you only learn the first two, you'll get 80% of the
-mileage.
+I reach for this most often when I'm bridging two libraries that don't know
+about each other and I just need a quick branch.
+
+## 3. Type predicates
+
+When the narrowing logic isn't trivial — say, validating something parsed
+from an API — wrap it in a function that returns `value is X`. The function
+becomes a contract: "if I return true, this value is that type."
+
+```ts
+function isUser(x: unknown): x is { id: string; name: string } {
+  return typeof x === "object" && x !== null && "id" in x && "name" in x;
+}
+```
+
+The trap with predicates is they're only as honest as you write them. The
+compiler trusts you. Lie once and the bug will surface a hundred lines away.
+
+## 4. Assertion functions
+
+Same shape as predicates, but they throw instead of returning a boolean.
+Useful at boundaries where you'd rather fail loudly than carry a wrong
+assumption deeper into the system.
+
+```ts
+function assertString(x: unknown): asserts x is string {
+  if (typeof x !== "string") throw new Error("not a string");
+}
+```
+
+## 5. `satisfies`
+
+The newest of the five, and the one I find myself reaching for more and
+more. It checks a value against a type *without* widening it.
+
+```ts
+const config = {
+  host: "localhost",
+  port: 5432,
+} satisfies { host: string; port: number };
+// config.host is "localhost", not string
+```
+
+The classic case is a config object: you want the structural check, but
+you also want to keep the literal types so you can use them later. `as`
+gives you the check at the cost of the inference. `satisfies` gives you
+both.
+
+---
+
+If you only learn the first two, you'll get 80% of the mileage. Add
+`satisfies` and you'll cover most of what's left. The other two are nice
+when you need them and invisible when you don't — which is honestly the
+highest praise I can give a TypeScript feature.

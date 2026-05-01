@@ -7,29 +7,54 @@ excerptTh: "รื้อโครงตั้งต้นทิ้ง เก็�
 tags: ["next.js", "mdx", "meta"]
 ---
 
-I tore down the old starter scaffolding and rebuilt this site on Next 15,
-React 19, and Tailwind v4. Posts live in MDX so I can mix prose with React
-components when a paragraph isn't enough.
+วันหนึ่งผมเปิดโปรเจกต์เว็บตัวเองขึ้นมา แล้วรู้สึกว่า — มันไม่ใช่เว็บของผมจริง ๆ
+มันคือ template ที่มีชื่อผมแปะอยู่ข้างบน
 
-ผมรื้อโครงสร้างตั้งต้นเดิมทิ้ง แล้วสร้างเว็บนี้ใหม่บน Next 15, React 19
-และ Tailwind v4 บทความเก็บเป็น MDX เพื่อให้ผมสามารถผสมเนื้อหากับคอมโพเนนต์
-React ได้เมื่อย่อหน้าเดียวไม่พอ
+ผมก็เลยรื้อทิ้ง
 
-## What I kept
+เริ่มใหม่บน **Next 15**, **React 19**, และ **Tailwind v4** บทความเก็บเป็น MDX
+เพราะบางย่อหน้าคำพูดธรรมดาไม่พอ ผมอยากแทรก component React เข้าไปได้
+โดยที่ไม่ต้องไปสร้างระบบ CMS ใหญ่โต
 
-- File-system content: `content/blog/*.mdx`, `content/projects/*.mdx`
-- `next-themes` for **light / dark / sepia**
-- The plain `gray-matter` + `next-mdx-remote/rsc` pipeline
+## เก็บอะไรไว้บ้าง
 
-## What I threw out
+- **เก็บไฟล์ในระบบไฟล์** — `content/blog/*.mdx`, `content/projects/*.mdx`
+  ไม่มี database ไม่มี admin panel โพสต์คือไฟล์ ไฟล์คือ git
+- **`next-themes`** สำหรับโหมด **light / dark / sepia** ตัว sepia ผมเพิ่มเองทีหลัง
+  เพราะอ่านยาว ๆ บนพื้นขาวแสบตาเกินไป
+- **pipeline แบบบ้าน ๆ** ใช้แค่ `gray-matter` กับ `next-mdx-remote/rsc` ไม่มี
+  contentlayer ไม่มี toolchain ที่ต้องคอย maintain เพิ่ม
 
-- The shadcn HSL slate palette (replaced with paper-warm tokens)
-- A single `--font-sans` (replaced with serif/sans/mono trio)
-- Anything I wasn't actually using
+## ทิ้งอะไรไป
+
+- **slate palette ของ shadcn** เปลี่ยนเป็น paper-warm tokens สีกระดาษอุ่น ๆ
+  ที่อ่านแล้วเหมือนนิตยสารเก่า ๆ
+- **`--font-sans` ตัวเดียว** เปลี่ยนเป็น serif/sans/mono สามตัวคู่กัน — serif
+  สำหรับเนื้อหา sans สำหรับ UI mono สำหรับโค้ด
+- **อะไรก็ตามที่ผมไม่ได้ใช้จริง** ๆ component ที่ generate มาแต่ไม่เคยเรียก
+  hook ที่เผื่อไว้ "เผื่อใช้" ลบหมดครับ เผื่อแล้วไม่ใช้คือหนี้ทางเทคนิคเปล่า ๆ
+
+## ทำไมต้อง MDX ไม่ใช่ markdown ธรรมดา
+
+จริง ๆ markdown ธรรมดาก็พอนะ สำหรับ 95% ของบทความที่ผมเขียน แต่อีก 5% นั้น
+ผมอยากแทรก component — chart เล็ก ๆ, callout แบบ interactive, หรือ embed
+ที่ไม่อยากใช้ iframe
+
+MDX ทำให้ผมไม่ต้องเลือก ผมเขียน markdown 95% และเขียน JSX 5% ในไฟล์เดียวกัน
+หน้าเดียวกัน — เหมือนเขียน HTML ผสม JS ในยุคแรก ๆ ที่ทุกอย่างยังเรียบง่าย
 
 ```bash
 pnpm dev   # http://localhost:5174
 ```
 
-The whole point of writing in MDX is that the page is the data. No CMS, no
-build step beyond `next build`, no second source of truth.
+## หน้าเว็บคือข้อมูล
+
+ที่ผมชอบที่สุดเกี่ยวกับการเขียนใน MDX คือ — หน้าเว็บมัน *คือ* ข้อมูลโดยตรง
+ไม่มี CMS ไม่มี build step นอกเหนือจาก `next build` ไม่มี source of truth ที่สอง
+ที่ต้อง sync กับอันแรก
+
+ถ้าผมอยากเปลี่ยนคำในย่อหน้านี้ ผมเปิดไฟล์ แก้ commit push เสร็จ ง่ายๆ สบายๆ ไม่ต้อง login
+ที่ไหน ไม่ต้องรอ webhook ไม่มี cache ที่ต้อง invalidate ด้วยมือ
+
+มันเรียบง่าย นึกถึงประโยคฝรั่งคลาสสิคที่บอกว่า Simple is best. ในงานทุกสเกลที่เราทำอยู่ให้เราเริ่มจากเล็กๆง่ายๆตาม Scale จริง ไม่ Over Complicate และผมรู้สึกว่า — เครื่องมือที่ดีควรหายไปอยู่เบื้องหลังงาน
+ไม่ใช่กลายเป็นงานเอง
