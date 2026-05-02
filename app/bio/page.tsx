@@ -91,27 +91,17 @@ export default function UnstyledBioPage() {
 
       <p>
         <small>
-          {/* Yes, this page has zero CSS on purpose. Every other page is properly
-          designed, I promise.{" "} */}
-
           Yes, This page is beautifully crafted with ❤️ <br/>
           See other pages here.{" "}
-          {/* Hard nav (plain <a>) so the unstyled / stays unstyled when the
-              browser comes back — styled CSS wouldn't unload after a soft nav. */}
+          {/* Hard nav (plain <a>) so the styled CSS loads cleanly when leaving the unstyled bio. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/blog">Read the blog</a> ·{" "}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/projects">See projects</a> ·{" "}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/about">About</a>
+          <a href="/">Home (about)</a>
         </small>
       </p>
-
-      {/* <p>
-        <small>
-          <i>(View source. The whole document is one tiny file. That&apos;s the joke.)</i>
-        </small>
-      </p> */}
 
       <script dangerouslySetInnerHTML={{ __html: easterEggScript }} />
     </>

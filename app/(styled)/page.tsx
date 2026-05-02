@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 // Type "ttt" anywhere → a tiny coffee cup appears next to the quote.
-// Mirrors the egg on /; same trigger, same payload, just on this page.
+// Mirrors the egg on /bio; same trigger, same payload, just on this page.
 const easterEggScript = `
   (function () {
     var buf = '';
@@ -32,7 +32,7 @@ const easterEggScript = `
   })();
 `;
 
-export default function AboutPage() {
+export default function HomePage() {
   const recentPosts = getAllPosts().slice(0, 3);
   const featured = getAllProjects().filter((p) => p.featured);
 
@@ -217,24 +217,23 @@ export default function AboutPage() {
       <section className="border-t border-rule pt-10 font-sans text-sm leading-[1.7] text-muted-foreground">
         <Eyebrow className="mb-2">Footnote · เชิงอรรถ</Eyebrow>
         <p>
-          The homepage at <code className="font-mono">/</code> is intentionally
-          unstyled — the same content as this About page, but with default
-          browser look. It&rsquo;s a small joke for anyone who reads source.
-          Wait 8 seconds on it, then look at the quote.
+          The bio page at <code className="font-mono">/bio</code> is intentionally
+          unstyled — the same content as this page, but with default browser
+          look. It&rsquo;s a small joke for anyone who reads source. Wait 8
+          seconds on it, then look at the quote.
           <br />
-          หน้า <code className="font-mono">/</code> จงใจปล่อยไม่ใส่ CSS —
-          เนื้อหาเดียวกับหน้านี้ แต่ใช้สไตล์เริ่มต้นของเบราว์เซอร์
+          หน้า <code className="font-mono">/bio</code> จงใจปล่อยไม่ใส่ CSS —
+          เนื้อหาคล้ายกับหน้านี้ แต่ใช้สไตล์เริ่มต้นของเบราว์เซอร์
         </p>
       </section>
 
       <p>
-        {/* Hard nav (plain <a>) so the unstyled / loads fresh without styled CSS. */}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        {/* Hard nav (plain <a>) so /bio loads fresh without styled CSS. */}
         <a
-          href="/"
+          href="/bio"
           className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
         >
-          ← Back to the unstyled bio
+          → Visit the unstyled bio
         </a>
       </p>
 

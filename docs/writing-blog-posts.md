@@ -156,7 +156,7 @@ The post body is wrapped in `prose prose-neutral dark:prose-invert max-w-none` (
 - Readable paragraph spacing
 - Styled lists, blockquotes, tables, code, links
 - Auto dark-mode adjustments
-- Sepia mode currently inherits dark prose colors — adjust in `app/globals.css` later if you want a sepia-specific prose variant
+- Tea mode currently inherits coffee prose colors — adjust in `app/globals.css` later if you want a tea-specific prose variant
 
 The page header (the `h1` title + date) is rendered **outside** the prose container by `app/blog/[slug]/page.tsx`. So you don't need to repeat the title in the body.
 

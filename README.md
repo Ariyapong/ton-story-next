@@ -7,7 +7,7 @@ Personal portfolio + blog.
 - Next.js 15 (App Router) + React 19
 - TypeScript 5
 - Tailwind v4 (CSS-first config in `app/globals.css`)
-- `next-themes` for light / dark / sepia
+- `next-themes` for milk / coffee / tea
 - MDX content (`gray-matter` + `next-mdx-remote/rsc`, `remark-gfm`)
 
 ## Run

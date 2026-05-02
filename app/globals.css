@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-@custom-variant sepia (&:where([data-theme="sepia"], [data-theme="sepia"] *));
+@custom-variant coffee (&:where([data-theme="coffee"], [data-theme="coffee"] *));
+@custom-variant tea (&:where([data-theme="tea"], [data-theme="tea"] *));
 
 @theme {
   --font-serif: var(--font-serif), "Sarabun", "Maitree", Georgia, serif;
@@ -31,7 +31,7 @@
 
 /* A² Editorial Notebook · paper-warm tokens */
 :root,
-[data-theme="light"] {
+[data-theme="milk"] {
   --bg: #f7f3ec;
   --fg: #1f1a14;
   --muted: #6b5f4d;
@@ -43,7 +43,7 @@
   --radius: 0.5rem;
 }
 
-[data-theme="dark"] {
+[data-theme="coffee"] {
   --bg: #13110d;
   --fg: #ece4d2;
   --muted: #9b8f78;
@@ -54,7 +54,7 @@
   --accent: #e88a5c;
 }
 
-[data-theme="sepia"] {
+[data-theme="tea"] {
   --bg: #ece0c6;
   --fg: #3a2a17;
   --muted: #7a6244;
@@ -63,6 +63,19 @@
   --card: #f3e8cf;
   --stripe: #3a2a17;
   --accent: #8a4014;
+}
+
+/* Theme switch crossfade via View Transitions API (Chrome/Safari) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0s;
+  }
 }
 
 @layer base {

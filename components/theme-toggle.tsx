@@ -5,13 +5,13 @@ import { useTheme } from "next-themes";
 
 import { CoffeeCup } from "@/components/coffee-cup";
 
-const ORDER = ["light", "dark", "sepia"] as const;
+const ORDER = ["light", "dark", "tea"] as const;
 type ThemeName = (typeof ORDER)[number];
 
 const LABELS: Record<ThemeName, { en: string; th: string }> = {
-  light: { en: "light", th: "สว่าง" },
-  dark: { en: "dark", th: "มืด" },
-  sepia: { en: "sepia", th: "ซีเปีย" },
+  light: { en: "milk", th: "นม" },
+  dark: { en: "coffee", th: "กาแฟ" },
+  tea: { en: "tea", th: "ชา" },
 };
 
 export function ThemeToggle() {
@@ -20,19 +20,26 @@ export function ThemeToggle() {
 
   useEffect(() => setMounted(true), []);
 
-  const current = ((theme === "system" ? resolvedTheme : theme) ?? "light") as ThemeName;
+  const raw = (theme === "system" ? resolvedTheme : theme) ?? "light";
+  const current: ThemeName = (ORDER as readonly string[]).includes(raw) ? (raw as ThemeName) : "light";
 
   const handleClick = () => {
     const idx = ORDER.indexOf(current);
-    setTheme(ORDER[(idx + 1) % ORDER.length]);
+    const next = ORDER[(idx + 1) % ORDER.length];
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+    if (typeof doc.startViewTransition === "function") {
+      doc.startViewTransition(() => setTheme(next));
+    } else {
+      setTheme(next);
+    }
   };
 
   return (
     <button
       type="button"
-      aria-label={mounted ? `Theme: ${current}. Click to cycle.` : "Toggle theme"}
+      aria-label={mounted ? `Theme: ${LABELS[current].en}. Click to cycle.` : "Toggle theme"}
       onClick={handleClick}
-      className="hover-lift inline-flex items-center gap-1.5 rounded-full border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+      className="hover-lift inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
     >
       {mounted ? (
         <>
@@ -47,7 +54,7 @@ export function ThemeToggle() {
 }
 
 function ThemeIcon({ current }: { current: ThemeName }) {
-  if (current === "sepia") return <CoffeeCup size={11} />;
+  if (current === "tea") return <CoffeeCup size={11} />;
   if (current === "dark") return <span aria-hidden>☾</span>;
   return <span aria-hidden>☀</span>;
 }
