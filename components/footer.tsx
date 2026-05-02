@@ -71,7 +71,7 @@ export function Footer() {
       </div>
       <div className="mx-auto flex w-full max-w-6xl items-baseline justify-between gap-2 border-t border-rule px-5 py-4 font-mono text-[10px] text-muted-foreground sm:px-8">
         <span>
-          © {year} Ariyapong Wongmaneerat · Built with Next.js + MDX
+          © {year} Ariyapong Wimolnoch · Built with ❤️
         </span>
         <span className="hidden sm:inline">
           tip: press <kbd className="border border-rule px-1.5 py-0.5">j</kbd>/

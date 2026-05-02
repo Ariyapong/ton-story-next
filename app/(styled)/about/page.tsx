@@ -51,9 +51,9 @@ export default function AboutPage() {
       <section className="space-y-3">
         <Eyebrow>Vol. 01 · Bangkok กรุงเทพฯ · 2026</Eyebrow>
         <h1 className="font-serif text-4xl font-medium leading-[1.05] tracking-tight text-balance md:text-6xl">
-          Hi, I&rsquo;m <em className="italic">Tony</em>.{" "}
+          Hi, I&rsquo;m <em className="italic">Ton</em>.{" "}
           <span className="text-muted-foreground">/</span>{" "}
-          <span className="font-sans">สวัสดี ผมโทนี่</span>
+          <span className="font-sans">สวัสดี ผมต้น</span>
         </h1>
         <p className="font-sans text-base text-muted-foreground md:text-lg">
           Senior software developer in Bangkok · นักพัฒนาซอฟต์แวร์อาวุโส กรุงเทพฯ
