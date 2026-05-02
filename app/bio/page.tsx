@@ -36,10 +36,10 @@ const easterEggScript = `
 export default function UnstyledBioPage() {
   return (
     <>
-      <h1>Hellow there, welcome to my website</h1>
+      <h1>Hello there, welcome to my website</h1>
       <h2>My name is Ariyapong Wimolnoch</h2>
       <p>
-        <b>Nickname:</b> Tony (or Ton)
+        <b>Nickname:</b> Ton (or Tony)
       </p>
       <p>
         <b>Role:</b> Software Developer
@@ -54,8 +54,8 @@ export default function UnstyledBioPage() {
       <h2>What I do</h2>
       <p>
         I build software for the web. Frontend mostly, but I&apos;ll happily wander
-        into backend, infra, or whatever the work needs. Lately: Next.js,
-        TypeScript, Tailwind, and a healthy amount of MDX.
+        into backend, infra, or whatever the work needs. <br/>Lately: Javascript,
+        TypeScript, React.js related Framework, Tailwind, and a healthy amount of MDX.
       </p>
 
       <h2>What I write about</h2>

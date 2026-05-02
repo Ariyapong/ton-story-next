@@ -1,0 +1,360 @@
+---
+title: "Terminal & AI CLI: the cheat sheet I keep coming back to"
+titleTh: "Terminal & AI CLI: คู่มือลัดที่ผมเปิดดูซ้ำตลอด"
+date: "2026-05-02"
+excerpt: "The keys, plugins, and AI CLIs I forget every two weeks — written down so I (and you) can Ctrl+F next time."
+excerptTh: "ปุ่มลัด ปลั๊กอิน และ AI CLI ที่ผมลืมทุก ๆ สองสัปดาห์ — จดไว้ที่นี่ให้กด Ctrl+F หาได้ครั้งหน้า"
+tags: ["terminal", "cli", "productivity", "ai", "reference"]
+---
+
+ผมไม่ได้เก่ง terminal ขนาดนั้น แค่ใช้มันบ่อยพอที่จะรู้ว่า — ทุกครั้งที่มือไปหยิบเมาส์ในหน้าต่าง terminal คือสัญญาณว่าผม *ลืม* อะไรบางอย่างไปอีกแล้ว
+
+โพสต์นี้เลยไม่ใช่ "10 เทคนิค terminal ที่จะเปลี่ยนชีวิตคุณ" มันคือ — โน้ตของผมเอง
+ที่ผมเปิดดูซ้ำทุกครั้งที่กลับมานั่งหน้าจอแล้วนิ้วเบลอ จดไว้ที่เดียว เปิดง่าย
+กด `Ctrl+F` หาเจอ จบ
+
+จุดประสงค์ของบทความนี้คือเขียนให้ตัวเองในอนาคตกลับมาอ่านเป็นหลัก ถ้าคุณอ่านแล้วมีประโยชน์ถือว่าเป็นโบนัส และผมก็จะยินดีมากที่ได้แบ่งปัน 👍 
+
+---
+
+## TL;DR — ถ้าจะจำแค่อย่างเดียว
+
+จำ **8 ปุ่มนี้** ก่อน ที่เหลือมาเก็บทีหลังก็ได้
+
+| Key | What it does |
+|---|---|
+| `Ctrl+A` / `Ctrl+E` | ไปต้นบรรทัด / ท้ายบรรทัด |
+| `Ctrl+U` / `Ctrl+K` | ลบทุกอย่างก่อน / หลัง cursor |
+| `Ctrl+W` | ลบหนึ่งคำก่อน cursor |
+| `Ctrl+Y` | paste สิ่งที่เพิ่งลบ (yank) |
+| `Ctrl+R` | ค้นประวัติคำสั่งย้อนหลัง |
+| `Ctrl+L` | clear หน้าจอ |
+
+ลืมเมาส์ไปครับ แค่แปดปุ่มนี้ความเร็วก็เพิ่มขึ้นมาเป็นคนละคนแล้ว
+
+## Word-jumping — เพราะ arrow key มันช้า
+
+| Key | Move |
+|---|---|
+| `Option+←` / `Option+→` | กระโดดทีละคำ (macOS Terminal/iTerm2) |
+| `Alt+B` / `Alt+F` | back / forward หนึ่งคำ (universal) |
+| `Ctrl+←` / `Ctrl+→` | บางที terminal map ให้แบบนี้ก็มี |
+
+ถ้า `Option+←` ไม่ทำงานบน iTerm2 ให้เข้าไปที่ Preferences → Profiles → Keys →
+Presets → "Natural Text Editing" จบเรื่องครับ ผมงงอยู่หลายเดือนกว่าจะรู้
+
+## Process control — เมื่อ command มันค้าง
+
+| Key   | Action |
+|---|---|
+| `Ctrl+C` | คิล command ที่กำลังรัน |
+| `Ctrl+D` | ส่ง EOF / ออก shell |
+| `Ctrl+Z` | suspend (พัก) ไว้ก่อน |
+| `fg` | เอา job ที่ suspend กลับมารันต่อ |
+| `bg` | ปล่อยให้รัน background |
+| `jobs` | ดูว่ามีอะไรค้างอยู่บ้าง |
+
+`Ctrl+Z` แล้ว `fg` คือ workflow โปรดของผม — กำลังรัน server อยู่ อยากแก้ไฟล์
+config ปุ๊บนึง ก็ `Ctrl+Z`, `vi config.json`, แก้, save, `fg` รันต่อ
+ไม่ต้องเปิด tab ใหม่
+
+## History magic — สิ่งที่ทำให้คุณดูเก่งขึ้น 50%
+
+```bash
+!!              # รันคำสั่งล่าสุดอีกครั้ง
+sudo !!         # โอเค ลืม sudo ใช่มั้ย
+!$              # argument สุดท้ายของคำสั่งก่อนหน้า
+                # ตัวอย่าง: ls /very/long/path  →  cd !$
+!cat            # รันคำสั่ง cat ล่าสุด
+^old^new        # รันคำสั่งล่าสุดอีกที แต่แทน old ด้วย new
+```
+
+แล้วก็ `Ctrl+R` พิมพ์คีย์เวิร์ดบางส่วน → กด `Ctrl+R` ซ้ำเพื่อหาเก่ากว่าเดิม →
+กด `Enter` รัน หรือ `Esc` เพื่อแก้ก่อนรัน อันนี้ทำให้ผมเลิกพยายามจำคำสั่งยาว ๆ
+ไปเลย
+
+## Directory teleporting
+
+```bash
+cd -            # กลับไป directory ก่อนหน้า (toggle)
+pushd /a/b/c    # เก็บ path นี้ไว้ใน stack แล้วกระโดดไป
+popd            # ดึง path บนสุดออกมาใช้
+dirs -v         # ดู stack
+```
+
+แต่จริง ๆ ที่ผมใช้บ่อยกว่ามากคือ **`z`** plugin (อยู่ในส่วน Oh My Zsh ด้านล่าง)
+มันจำ directory ที่ผมเข้าบ่อย ๆ แล้วให้ผมพิมพ์แค่ `z some-keyword` มันจะ
+teleport ไปให้เอง สมองผมไม่ต้องจำ path ยาว ๆ
+
+## iTerm2 — แค่ 6 ปุ่มก็พอ
+
+| Key | What |
+|---|---|
+| `Cmd+T` / `Cmd+W` | tab ใหม่ / ปิด tab |
+| `Cmd+D` | split แนวตั้ง |
+| `Shift+Cmd+D` | split แนวนอน |
+| `Cmd+Option+←/→/↑/↓` | สลับ pane |
+| `Cmd+;` | autocomplete จาก history (อันโปรด) |
+| `Cmd+Shift+H` | paste history |
+
+iTerm2 มี hotkey window ด้วย — ตั้งให้ `⌃ + Space` เรียก terminal แบบ Quake
+ลอยขึ้นมาจากขอบบนได้ Preferences → Keys → Hotkey 
+
+---
+
+![Terminal navigation keyboard shortcuts](/images/blog/terminal-ai-cli/keyboard-shortcuts.png)
+
+*Infographic ที่ผมให้ NotebookLM สรุปจาก source ทั้งหมด เก็บไว้เป็น
+ภาพรวมก่อนลงรายละเอียด*
+
+---
+
+## Oh My Zsh — ปลั๊กอิน 10 ตัวที่คุ้มที่จะเปิด
+
+ติดตั้งครั้งเดียว `~/.zshrc` แค่บรรทัดเดียว:
+
+```bash
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting z web-search sudo extract history copypath copyfile)
+```
+
+แล้วทำตามนี้ครับ:
+
+| Plugin | สิ่งที่มันทำ |
+|---|---|
+| `git` | alias สั้น ๆ เพียบ — `gst`, `gco`, `gp`, `gl`, `gc -m "..."` |
+| `zsh-autosuggestions` | suggest คำสั่งจาก history ขณะพิมพ์ กด `→` รับ |
+| `zsh-syntax-highlighting` | คำสั่งถูก = เขียว, ผิด = แดง รู้ก่อน Enter |
+| `z` | `z keyword` → teleport ไป directory ที่เคยไป |
+| `web-search` | `google "what is rust trait"` ค้นใน terminal |
+| `sudo` | กด `Esc Esc` เพื่อแปะ `sudo` ข้างหน้าคำสั่ง |
+| `extract` | `extract file.tar.gz` แตกอะไรก็ได้ ไม่ต้องจำ flag |
+| `history` | `h`, `hs keyword`, `hsi` (case-insensitive) |
+| `copypath` | copy path ของ directory ปัจจุบันใส่ clipboard |
+| `copyfile` | `copyfile foo.txt` copy เนื้อไฟล์ใส่ clipboard |
+
+`zsh-autosuggestions` กับ `zsh-syntax-highlighting` ต้องโคลนแยก:
+
+```bash
+git clone https://github.com/zsh-users/zsh-autosuggestions \
+  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting \
+  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```
+
+theme ผมใช้ `powerlevel10k` มาตลอด เร็วและสวย ตั้งครั้งแรกใช้เวลา 5 นาที
+แต่ใช้ทุกวันไป 3 ปี — คุ้มมาก
+
+## Aliases ที่ผมไม่ยอมอยู่ถ้าไม่มี
+
+```bash
+# ~/.zshrc
+alias zshrc="vi ~/.zshrc"      # เปิดไฟล์ config
+alias src="source ~/.zshrc"     # reload shell — แก้แล้วเห็นผลทันที
+alias ..="cd .."
+alias ...="cd ../.."
+alias ll="ls -lhA"
+alias g="git"
+alias gst="git status -sb"
+alias glog="git log --oneline --graph --decorate -20"
+alias serve="python3 -m http.server"   # static server เร็ว ๆ
+alias myip="curl -s ifconfig.me"
+```
+
+โค้ดจริง ๆ จะมีมากกว่านี้ แต่นี่คือ "ไม่มี ไม่มีชีวิต" tier
+
+## Nano ใน 7 ปุ่ม (เผื่อ SSH เข้าเครื่องเก่า)
+
+ส่วนใหญ่ผมใช้ vim แต่บางที SSH เข้า server ที่มีแค่ nano ก็ต้องเอาตัวรอด
+
+| Key | Action |
+|---|---|
+| `Ctrl+O` | save (Write Out) |
+| `Ctrl+X` | exit |
+| `Ctrl+W` | search |
+| `Ctrl+\` | search & replace |
+| `Ctrl+K` | cut บรรทัด |
+| `Ctrl+U` | paste บรรทัดที่เพิ่ง cut |
+| `Alt+U` | undo |
+
+แค่นี้พอใช้งานได้ 90% ของกรณี ที่เหลือ Google เอา
+
+## Vim survival kit — ขั้นต่ำที่ต้องรอด
+
+vim ตกใจน่ากลัวกว่าที่ควร เพราะคนสอนชอบยัด feature เยอะเกิน นี่คือชุดที่
+ใช้เอาตัวรอดได้จริง ๆ
+
+**Modes** (สำคัญที่สุด):
+
+- `Esc` → Normal mode (default, ไว้สั่งงาน)
+- `i` → Insert mode (พิมพ์ข้อความ)
+- `:` → Command-line mode (สั่ง save/quit)
+
+**Movement** (Normal mode):
+
+```text
+h j k l         ← ↓ ↑ →
+w / b           กระโดดคำหน้า / คำหลัง
+0 / $           ต้น / ท้ายบรรทัด
+gg / G          ต้น / ท้ายไฟล์
+/keyword        search → กด n / N เพื่อ next / previous
+```
+
+**Edit** (Normal mode):
+
+```text
+i / a / o       insert ที่ cursor / หลัง cursor / บรรทัดใหม่ใต้
+dd              cut บรรทัด
+yy              copy บรรทัด
+p               paste
+u               undo
+Ctrl+R          redo
+```
+
+**Save & quit** (Command-line):
+
+```text
+:w              save
+:q              quit
+:wq             save + quit
+:q!             quit ทิ้ง changes
+```
+
+**Text objects — ปุ่มที่ทำให้รู้สึกว่า vim เก่งจริง**
+
+```text
+ciw             change inner word
+diw             delete inner word
+ci"             change ข้างใน "..."
+ca(             change รวม "(...)"
+yi]             yank ข้างใน [...]
+```
+
+ลองนึกภาพ: cursor อยู่ตรงไหนก็ได้ใน `"hello world"` แล้วกด `ci"` →
+มันจะลบ `hello world` ทิ้งและเข้า insert mode ให้ทันที *ไม่ต้องเลือก* ไม่ต้อง
+ลากเมาส์ ไม่ต้องวาง cursor ให้ตรง นี่คือ super power ของ vim
+
+---
+
+![How to use Nano and Vim text editors](/images/blog/terminal-ai-cli/text-editors.png)
+
+*สรุปทั้ง nano และ vim ในภาพเดียว — ตอนแรกผมว่าจะวาดเอง แต่ NotebookLM
+generate ออกมาดีกว่ามือผมเยอะ*
+
+---
+
+## AI CLIs — ปี 2026 มีอะไรน่าใช้บ้าง
+
+ผมลองมาแล้วทุกตัวที่ดังในปีนี้ ขอสรุปสั้น ๆ:
+
+### Claude Code — ตัวหลักของผม
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude        # ใน repo ของคุณ
+```
+
+ดีตรง: อ่าน codebase ทั้งโปรเจกต์ได้, รัน terminal command ได้เอง, แก้
+หลายไฟล์พร้อมกัน, มี **Agent SDK** สำหรับสร้าง custom agent เป็นของตัวเอง
+(ที่ผมใช้สร้าง pipeline เล็ก ๆ ในบ้าน)
+
+ใช้บ่อยที่สุดเวลา: refactor ข้ามไฟล์, อ่าน error stack แล้วให้มันเดาก่อน,
+เขียน test จาก behavior ที่อธิบายเป็นภาษาคน
+
+### Codex CLI — ตัวเลือกฝั่ง OpenAI
+
+ราคาคุ้ม ใช้ ChatGPT plan ได้เลยถ้ามีอยู่แล้ว เหมาะกับงาน prototyping
+และทดลอง feature ใหม่ ๆ ที่ไม่ต้องอ่าน context เยอะ
+
+### Gemini CLI — ตัวฟรีที่ผมใช้จริง
+
+```bash
+npm install -g @google/gemini-cli
+gemini        # login ครั้งแรกด้วย Google account
+```
+
+ดีตรง: **ฟรี** สำหรับใช้งานส่วนตัว (ล็อกอินด้วย Google account ปกติได้
+quota ใจดีมาก), ใช้ Gemini 2.5 Pro เป็น default, รองรับ **MCP** เหมือน Claude
+Code, search Google ได้ในตัว, อ่าน/แก้ไฟล์ + รัน shell command ได้เอง
+
+ผมใช้บ่อยตอน: งานที่ไม่อยากเปลือง quota Claude, prototype ไอเดียเร็ว ๆ,
+หรือเวลาอยากให้มันค้น web มาประกอบบริบทก่อนเขียนโค้ด — `gemini -p "..."`
+ใช้ใน script ได้เลย ไม่ต้องเปิด interactive
+
+### OpenCode — สาย open-source
+
+รองรับ provider เกือบทุกเจ้า (Anthropic, OpenAI, Google, local Ollama)
+ปรับแต่งได้ทุกซอกทุกมุม ถ้าคุณอยู่สาย hardcore ที่อยาก self-host หรือ
+สลับ model ตาม mood นี่คือคำตอบ
+
+---
+
+> เลือกยังไงดี? ถ้าทำงานจริงทุกวัน — Claude Code
+>
+> ถ้าอยากประหยัดและมี ChatGPT plan อยู่แล้ว — Codex CLI
+>
+> ถ้าอยาก free + quota ใจดี — Gemini CLI
+>
+> ถ้าอยากคุมทุกอย่างเอง — OpenCode
+
+## Combo moves — ที่ผมใช้จริงทุกวัน
+
+**The "ลืม sudo" combo:**
+```bash
+apt install foo     # zsh: command not found หรือ permission denied
+sudo !!             # หรือกด Esc Esc ถ้าใช้ sudo plugin
+```
+
+**The "แก้ไฟล์เร็ว ๆ" combo:**
+```bash
+# กำลังรัน server อยู่ใน foreground
+# Ctrl+Z          → suspend
+vi .env           # แก้
+# :wq             → save & quit
+fg                # รัน server ต่อ
+```
+
+**The "AI + grep" combo:**
+```bash
+docker logs my-app 2>&1 | tail -200 > /tmp/log.txt
+claude "อ่าน /tmp/log.txt แล้วบอกผมว่า error จริง ๆ คืออะไร"
+```
+
+**The "teleport + AI" combo:**
+```bash
+z my-project       # z plugin teleport
+claude             # เปิด Claude Code ใน repo
+# > "เพิ่ม endpoint /health แบบ test ครบ"
+```
+
+---
+
+## Mind map — ภาพรวมทั้งหมดในที่เดียว
+
+ถ้ายังจำไม่ไหว นี่คือโครงทั้งหมดของโพสต์นี้แบบย่อ ๆ ไว้กลับมาดู:
+
+- **Zsh / Productivity**
+  - autosuggestions, syntax-highlighting
+  - history expansion (`!!`, `!$`, `sudo !!`)
+  - directory teleport (`cd -`, `z`, `pushd`/`popd`)
+- **Oh My Zsh framework**
+  - install: curl/wget → ตั้งค่าใน `~/.zshrc`
+  - theme: agnoster, powerlevel10k
+  - plugins: git, sudo, extract, copypath, ...
+- **Line editing & navigation**
+  - ZLE keymaps (Emacs default / Vi)
+  - Ctrl+A/E, Ctrl+U/K/W/Y, Ctrl+R, Ctrl+L
+- **Editors**
+  - Nano: Ctrl+O save, Ctrl+X exit, Ctrl+W search
+  - Vim: modes, hjkl, dd/yy/p, text objects (`ciw`, `ci"`)
+- **Agentic Coding**
+  - Claude Code (+ Agent SDK)
+  - Codex CLI / Gemini CLI / OpenCode
+
+## ส่งท้าย
+
+โพสต์นี้คือ snapshot ของสิ่งที่ผมใช้ ณ วันที่ 2026-05-02 — เครื่องมือพวกนี้
+เปลี่ยนเร็วมาก โดยเฉพาะฝั่ง AI CLI ผมจะกลับมา *แก้ไฟล์นี้* (ไม่ใช่เขียนโพสต์ใหม่)
+เมื่อมีอะไรเปลี่ยน เพราะมันคือ reference ของผมเอง ไม่ใช่ time capsule
+
+ครั้งหน้าที่นั่งหน้าจอแล้วนิ้วเบลอ ๆ กลับมาเปิดหน้านี้ กด `Ctrl+F` หาในสิ่งที่ลืม ใช้ภายใน 10 วินาที
+จบ นั่นคือสิ่งที่ผมตั้งใจให้โพสต์นี้เป็น
