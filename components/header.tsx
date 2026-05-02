@@ -23,6 +23,7 @@ export function Header() {
 
   return (
     <header className="theme-fade sticky top-0 z-40 w-full border-b border-rule bg-background/85 backdrop-blur">
+      <div className="header-bar"></div>
       <div className="mx-auto flex w-full max-w-6xl items-baseline justify-between gap-4 px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-baseline gap-2 hover-lift">
           <span className="font-serif text-xl italic">Ton Story</span>

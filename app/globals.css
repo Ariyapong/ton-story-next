@@ -214,16 +214,34 @@
   line-height: 1.78;
 }
 
+.header-bar {
+  text-align: center;
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent),
+    #8ed6fb 50%,
+    #d32e9d
+  );
+  padding: 2px;
+}
+
 /* hover/page-transition micro-interactions */
 @media (prefers-reduced-motion: no-preference) {
   .hover-lift {
-    transition: transform 220ms ease, color 180ms ease;
+    transition:
+      transform 220ms ease,
+      color 180ms ease;
   }
   .hover-lift:hover {
     transform: translateY(-1px);
   }
   .theme-fade {
-    transition: background 320ms ease, color 320ms ease, border-color 320ms ease;
+    transition:
+      background 320ms ease,
+      color 320ms ease,
+      border-color 320ms ease;
   }
 }
 
