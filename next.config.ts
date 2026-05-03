@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: "/about", destination: "/", permanent: true }];
   },
+  // On Next 15.1.x webpack is still the dev default. To migrate to Turbopack
+  // (default in Next 15.3+/16): flip `bundler` to "turbopack", replace this
+  // `webpack` block with a top-level `turbopack` block per the @code-inspector
+  // /turbopack README, and add `--turbo` to the `dev` script in package.json.
   webpack: (config, { dev }) => {
     if (dev) {
       config.plugins.push(
