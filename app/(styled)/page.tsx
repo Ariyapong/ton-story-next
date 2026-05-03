@@ -56,7 +56,7 @@ export default function HomePage() {
           <span className="font-sans">สวัสดี ผมต้น</span>
         </h1>
         <p className="font-sans text-base text-muted-foreground md:text-lg">
-          Senior software developer in Bangkok · นักพัฒนาซอฟต์แวร์อาวุโส กรุงเทพฯ
+          Senior software developer in Bangkok · นักพัฒนาซอฟต์แวร์อาวุโส อยู่ที่กรุงเทพฯ
         </p>
       </section>
 
@@ -68,7 +68,7 @@ export default function HomePage() {
             the index; the writing is where I really live.
           </p>
           <p className="font-sans text-[15px] leading-[1.78] text-muted-foreground">
-            ผมเขียนโค้ดสำหรับเว็บ — ส่วนใหญ่เป็นฝั่ง frontend แต่ก็ตามงานไปได้ทุกที่ที่จำเป็น หน้านี้เป็นเพียงสารบัญ งานเขียนคือที่ที่ผมอยู่จริง ๆ
+            ผมเขียนโค้ดสำหรับเว็บ — ส่วนใหญ่เป็นฝั่ง frontend แต่ก็ตามงานไปได้ทุกที่ที่จำเป็น หน้านี้เป็นเพียงสารบัญ Blog คือที่ที่ผมอยู่จริง ๆ
             ส่วนใหญ่เกี่ยวกับ Javascript, TypeScript, React.js, React Frameworks และเรื่องเล็ก ๆ น้อย ๆ
             ที่ผมเรียนรู้
           </p>
@@ -217,25 +217,22 @@ export default function HomePage() {
       <section className="border-t border-rule pt-10 font-sans text-sm leading-[1.7] text-muted-foreground">
         <Eyebrow className="mb-2">Footnote · เชิงอรรถ</Eyebrow>
         <p>
-          The bio page at <code className="font-mono">/bio</code> is intentionally
-          unstyled — the same content as this page, but with default browser
-          look. It&rsquo;s a small joke for anyone who reads source. Wait 8
-          seconds on it, then look at the quote.
+          Type <code className="font-mono">ttt</code> anywhere on this page,
+          then look at the quote. Small joke for anyone paying attention.
           <br />
-          หน้า <code className="font-mono">/bio</code> จงใจปล่อยไม่ใส่ CSS —
-          เนื้อหาคล้ายกับหน้านี้ แต่ใช้สไตล์เริ่มต้นของเบราว์เซอร์
+          ลองพิมพ์ <code className="font-mono">ttt</code> ที่ไหนก็ได้บนหน้านี้ แล้วดูที่คำพูด — เรื่องเล็ก ๆ สำหรับคนที่สังเกต
+        </p>
+        <p className="mt-3">
+          Or type a drink — <code className="font-mono">coffee</code>,{" "}
+          <code className="font-mono">tea</code>,{" "}
+          <code className="font-mono">milk</code> — and the page shifts its mood.
+          <br />
+          หรือพิมพ์ชื่อเครื่องดื่ม — <code className="font-mono">coffee</code>,{" "}
+          <code className="font-mono">tea</code>,{" "}
+          <code className="font-mono">milk</code> — แล้วดูหน้าเปลี่ยนอารมณ์ตาม
         </p>
       </section>
 
-      <p>
-        {/* Hard nav (plain <a>) so /bio loads fresh without styled CSS. */}
-        <a
-          href="/bio"
-          className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
-        >
-          → Visit the unstyled bio
-        </a>
-      </p>
 
       <script dangerouslySetInnerHTML={{ __html: easterEggScript }} />
     </div>

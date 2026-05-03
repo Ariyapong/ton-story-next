@@ -2,6 +2,7 @@ import "../globals.css";
 
 import { IBM_Plex_Mono, IBM_Plex_Sans_Thai_Looped, IBM_Plex_Serif } from "next/font/google";
 
+import { EasterEggs } from "@/components/easter-eggs";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { KeyboardNav } from "@/components/keyboard-nav";
@@ -52,6 +53,7 @@ export default function StyledLayout({
           </main>
           <Footer />
           <KeyboardNav />
+          <EasterEggs />
         </div>
       </ScreenProvider>
     </ThemeProvider>

@@ -26,8 +26,8 @@ export function Header() {
       <div className="header-bar"></div>
       <div className="mx-auto flex w-full max-w-6xl items-baseline justify-between gap-4 px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-baseline gap-2 hover-lift">
-          <span className="font-serif text-xl italic">Ton Story</span>
-          <span className="font-sans text-sm text-muted-foreground">· ต้นสตอรี่</span>
+          <span className="font-serif text-xl italic">Aritoton</span>
+          <span className="font-sans text-sm text-muted-foreground">· อาริโตต้น</span>
         </Link>
 
         <nav className="hidden items-baseline gap-6 md:flex">
