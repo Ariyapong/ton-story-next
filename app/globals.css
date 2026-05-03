@@ -55,12 +55,12 @@
 }
 
 [data-theme="tea"] {
-  --bg: #ece0c6;
+  --bg: #f1e7d0;
   --fg: #3a2a17;
   --muted: #7a6244;
   --muted-bg: #e2d3b3;
   --rule: rgba(58, 42, 23, 0.22);
-  --card: #f3e8cf;
+  --card: #faf2dc;
   --stripe: #3a2a17;
   --accent: #8a4014;
 }

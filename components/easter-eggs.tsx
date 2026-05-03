@@ -71,7 +71,15 @@ export function EasterEggs() {
         }, 1200);
         for (const word of Object.keys(THEME_WORDS)) {
           if (textBuf.endsWith(word)) {
-            setTheme(THEME_WORDS[word]);
+            const next = THEME_WORDS[word];
+            const doc = document as Document & {
+              startViewTransition?: (cb: () => void) => unknown;
+            };
+            if (typeof doc.startViewTransition === "function") {
+              doc.startViewTransition(() => setTheme(next));
+            } else {
+              setTheme(next);
+            }
             textBuf = "";
             break;
           }
