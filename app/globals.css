@@ -43,6 +43,15 @@
   --radius: 0.5rem;
 }
 
+:root {
+  --gradient-bar: linear-gradient(
+    90deg,
+    var(--color-accent),
+    #8ed6fb 50%,
+    #d32e9d
+  );
+}
+
 [data-theme="coffee"] {
   --bg: #13110d;
   --fg: #ece4d2;
@@ -237,13 +246,12 @@
   text-align: center;
   color: rgb(255, 255, 255);
   font-size: 1rem;
-  background: linear-gradient(
-    90deg,
-    var(--color-accent),
-    #8ed6fb 50%,
-    #d32e9d
-  );
+  background: var(--gradient-bar);
   padding: 2px;
+}
+
+.gradient-bar {
+  background: var(--gradient-bar);
 }
 
 /* reading-progress confetti puff */

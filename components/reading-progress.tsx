@@ -38,10 +38,10 @@ export function ReadingProgress() {
     <>
       <div
         aria-hidden="true"
-        className="fixed left-0 right-0 top-0 z-50 h-[2px] bg-rule"
+        className="fixed left-0 right-0 top-0 z-50 h-[3px] bg-transparent mt-[4px]"
       >
         <div
-          className="h-full bg-accent transition-[width] duration-100 ease-out"
+          className="h-full gradient-bar transition-[width] duration-100 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
