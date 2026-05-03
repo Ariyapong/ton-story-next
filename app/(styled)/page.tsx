@@ -98,7 +98,7 @@ export default function HomePage() {
                 github
               </a>
               <a
-                href="mailto:ariyapongw.ton@gmail.com"
+                href="mailto:ariyapong.ton@aritoton.com"
                 className="underline decoration-accent decoration-1 underline-offset-4 hover:text-accent"
               >
                 email

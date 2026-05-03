@@ -1,0 +1,43 @@
+---
+title: "Docnav"
+summary: "A Cmd+K command palette and sticky outline for any documentation site."
+summaryTh: "Cmd+K command palette และ outline ติดข้างจอ ใช้ได้กับเว็บ docs ทุกเว็บ"
+date: "2026-05-03"
+year: "26"
+stack: ["Chrome MV3", "TypeScript", "Vite", "Shadow DOM"]
+repo: "https://github.com/Ariyapong/docnav"
+featured: true
+---
+
+A Chrome extension I built because I open MDN, React docs, Next docs, and
+Tailwind docs about a hundred times a day, and the only thing they have in
+common is that finding the right heading is annoying.
+
+## What it does
+
+- **⌘⇧K** opens a fuzzy command palette over every `h1`–`h4` on the page.
+  Type a few letters, press Enter, scroll-snaps you there.
+- **⌘⇧O** toggles a sticky outline panel that highlights your current
+  section as you scroll. Full keyboard nav (↑↓, Enter, Esc, Home/End).
+- Recent doc pages you visited surface inside the palette and the popup,
+  so jumping back doesn't require remembering the URL.
+- Per-site enable/disable, plus a System / Light / Dark theme toggle that
+  propagates live to every open tab.
+
+## How it's built
+
+- Manifest V3, TypeScript, Vite + `@crxjs/vite-plugin`.
+- The whole UI lives inside a **shadow DOM** so the host page's CSS can't
+  reach it (and vice versa) — no fighting with Tailwind on docs sites or
+  whatever a random vendor shipped on theirs.
+- Vanilla DOM in the content script, no React. The bundle is tiny and the
+  shadow root has no framework runtime to worry about.
+- Storage via `chrome.storage.local`, with `chrome.storage.onChanged` so
+  the popup and every tab stay in sync without messaging plumbing.
+
+## Why it's small on purpose
+
+Most browser extensions I've installed do one useful thing buried under
+seven settings panels. docnav is an attempt at the opposite — two
+hotkeys, one popup, no account, no sync. If I forget how to use it after
+a month, the README will fit on one screen.

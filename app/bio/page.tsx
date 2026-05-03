@@ -83,7 +83,7 @@ export default function UnstyledBioPage() {
         </li>
         <li>
           Email:{" "}
-          <a href="mailto:ariyapongw.ton@gmail.com">ariyapongw.ton@gmail.com</a>
+          <a href="mailto:ariyapong.ton@aritoton.com">ariyapong.ton@aritoton.com</a>
         </li>
       </ul>
 
