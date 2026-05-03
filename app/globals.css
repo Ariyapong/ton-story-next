@@ -128,13 +128,13 @@
 
 /* MDX prose tuning to match A² */
 .prose-editorial {
-  font-family: var(--font-serif);
+  font-family: var(--font-serif), var(--font-sans);
   color: var(--fg);
   font-size: 1.0625rem;
   line-height: 1.7;
 }
 .prose-editorial :where(h1, h2, h3, h4) {
-  font-family: var(--font-serif);
+  font-family: var(--font-serif), var(--font-sans);
   font-weight: 500;
   letter-spacing: -0.01em;
 }
