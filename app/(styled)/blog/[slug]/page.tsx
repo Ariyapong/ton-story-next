@@ -62,7 +62,7 @@ export default async function BlogPostPage({
   return (
     <>
       <ReadingProgress />
-      <article className="grid gap-10 md:grid-cols-[140px_minmax(0,1fr)_160px] md:gap-12">
+      <article className="grid grid-cols-1 gap-10 md:grid-cols-[140px_minmax(0,1fr)_160px] md:gap-12">
         <aside className="md:order-1">
           <div className="md:sticky md:top-24 md:space-y-5">
             {/* Mobile chip row */}
@@ -120,7 +120,7 @@ export default async function BlogPostPage({
           </div>
         </aside>
 
-        <div className="max-w-[640px] md:order-2">
+        <div className="min-w-0 max-w-[640px] md:order-2">
           <Link
             href="/blog"
             className="mb-3 inline-block font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground md:hidden"

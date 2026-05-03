@@ -194,6 +194,25 @@
   padding: 0;
   border-radius: 0;
 }
+.prose-editorial :where(table) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  margin: 1.2em 0;
+}
+.prose-editorial :where(th, td) {
+  border: 1px solid var(--rule);
+  padding: 0.45em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-editorial :where(thead th) {
+  background: var(--muted-bg);
+  font-weight: 500;
+}
 .prose-editorial ul,
 .prose-editorial ol {
   margin: 0 0 1.1em;
