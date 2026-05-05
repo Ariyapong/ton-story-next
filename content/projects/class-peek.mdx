@@ -1,0 +1,42 @@
+---
+title: "Class Peek"
+summary: "VSCode extension — cmd-click any class name through clsx/cva/Tailwind and jump to its CSS."
+summaryTh: "VSCode extension กด cmd-click ที่ class แล้วกระโดดไป CSS ได้ ผ่าน clsx/cva/Tailwind"
+date: "2026-05-05"
+year: "26"
+stack: ["VSCode API", "TypeScript", "AST", "Tailwind v4"]
+link: "https://marketplace.visualstudio.com/items?itemName=Aritoton.class-peek"
+---
+
+A small VSCode extension that lets you `⌘`-click any class name in a
+JSX/TSX file and jump straight to where it's defined, even when the
+class is buried inside a `clsx` / `cn` / `classnames` / `cva` / `tv`
+wrapper.
+
+## Why it exists
+
+The existing **CSS Peek** is great, but its [issue #82][issue]
+(*"add support for clsx/classnames"*) has been open since July 2020.
+That's the painpoint — every project I touch at work uses one of
+those helpers, so peek-definition silently stops working the moment
+the class moves out of a plain string literal.
+
+[issue]: https://github.com/pranaygp/vscode-css-peek/issues/82
+
+## MVP scope
+
+- **AST traversal** through the class-helper wrappers, so the click
+  target works the same whether you write `className="p-4"` or
+  `className={cn("p-4", isActive && "bg-accent")}`.
+- **Tailwind v4 reverse lookup** via `@theme` — clicking `bg-accent`
+  resolves the CSS variable back to its definition in your tokens.
+- Out of scope for v0.1: hover preview, find-references, rename,
+  SCSS `&` nesting, styled-components, CSS Modules. The Modules
+  space is already saturated (typescript-plugin-css-modules,
+  react-ts-css, css-modules-kit) — no point fighting there.
+
+## Why small on purpose
+
+One hotkey, one job. If it can't replace CSS Peek for the cases
+CSS Peek already handles, that's fine — the wedge is the cases it
+*doesn't*.
