@@ -2,15 +2,16 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
+import { DEFAULT_LANG, isLang, type Lang } from "@/lib/i18n";
+
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
 export interface PostFrontmatter {
   title: string;
-  titleTh?: string;
   date: string;
   excerpt?: string;
-  excerptTh?: string;
   tags?: string[];
+  lang: Lang;
 }
 
 export interface Post extends PostFrontmatter {
@@ -50,11 +51,10 @@ export function getPostBySlug(slug: string): Post | null {
   return {
     slug: realSlug,
     title: fm.title ?? realSlug,
-    titleTh: fm.titleTh,
     date: fm.date ?? new Date().toISOString(),
     excerpt: fm.excerpt,
-    excerptTh: fm.excerptTh,
     tags: fm.tags,
+    lang: isLang(fm.lang) ? fm.lang : DEFAULT_LANG,
     content,
     readingTime: readingTime(content),
   };

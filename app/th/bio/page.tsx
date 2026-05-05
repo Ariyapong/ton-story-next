@@ -1,6 +1,5 @@
-// The unstyled bio.
-// Loaded under the minimal root layout — no globals.css, no fonts, no Tailwind.
-// What you see is the raw browser default. That's the joke.
+// /th/bio — same unstyled bio as /bio, but with a small "English only" notice
+// at the top because the body copy stays English regardless of chrome lang.
 
 import type { Metadata } from "next";
 
@@ -12,6 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/bio" },
 };
 
-export default function UnstyledBioPage() {
-  return <BioContent lang="en" />;
+export default function UnstyledBioPageTh() {
+  return <BioContent lang="th" />;
 }

@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+
+import { DEFAULT_LANG, isLang, localizeHref } from "@/lib/i18n";
 
 // j / k navigation across `[data-post-row]` items, "g h" home, "/" focus search/href.
 export function KeyboardNav() {
   const router = useRouter();
+  const rawLang = useParams<{ lang?: string }>()?.lang;
+  const lang = isLang(rawLang) ? rawLang : DEFAULT_LANG;
 
   useEffect(() => {
     let buf = "";
@@ -63,11 +67,11 @@ export function KeyboardNav() {
         bufTimer = window.setTimeout(() => {
           buf = "";
         }, 700);
-        if (buf === "gh") router.push("/");
-        else if (buf === "gb") router.push("/blog");
-        else if (buf === "gp") router.push("/projects");
-        else if (buf === "gt") router.push("/tags");
-        else if (buf === "ga") router.push("/about");
+        if (buf === "gh") router.push(localizeHref("/", lang));
+        else if (buf === "gb") router.push(localizeHref("/blog", lang));
+        else if (buf === "gp") router.push(localizeHref("/projects", lang));
+        else if (buf === "gt") router.push(localizeHref("/tags", lang));
+        else if (buf === "ga") router.push(localizeHref("/", lang));
       }
     }
 
@@ -76,7 +80,7 @@ export function KeyboardNav() {
       window.removeEventListener("keydown", onKey);
       if (bufTimer) window.clearTimeout(bufTimer);
     };
-  }, [router]);
+  }, [router, lang]);
 
   return null;
 }

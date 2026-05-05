@@ -8,11 +8,22 @@ import { Eyebrow } from "@/components/eyebrow";
 import { ReadingProgress } from "@/components/reading-progress";
 import { getAdjacentPosts, getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { formatDateMono, formatReadingTime } from "@/lib/format";
+import {
+  LANGS,
+  canonicalFor,
+  getDict,
+  hreflangAlternates,
+  isLang,
+  localizeHref,
+  ogLocale,
+} from "@/lib/i18n";
 
-type Params = { slug: string };
+type Params = { lang: string; slug: string };
 
 export function generateStaticParams() {
-  return getPostSlugs().map((slug) => ({ slug }));
+  return LANGS.flatMap((lang) =>
+    getPostSlugs().map((slug) => ({ lang, slug })),
+  );
 }
 
 export async function generateMetadata({
@@ -20,19 +31,25 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { lang, slug } = await params;
+  if (!isLang(lang)) return {};
   const post = getPostBySlug(slug);
   if (!post) return {};
-  const url = `/blog/${post.slug}`;
+  const path = `/blog/${post.slug}`;
+  const url = canonicalFor(path, lang);
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: hreflangAlternates(path),
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt,
       type: "article",
       url,
+      locale: ogLocale(lang),
       publishedTime: post.date,
       authors: ["Ariyapong Wongmaneerat"],
       tags: post.tags,
@@ -50,9 +67,11 @@ export default async function BlogPostPage({
 }: {
   params: Promise<Params>;
 }) {
-  const { slug } = await params;
+  const { lang, slug } = await params;
+  if (!isLang(lang)) notFound();
   const post = getPostBySlug(slug);
   if (!post) notFound();
+  const dict = getDict(lang);
 
   const { prev, next } = getAdjacentPosts(slug);
   const related = getAllPosts()
@@ -76,7 +95,7 @@ export default async function BlogPostPage({
               {post.tags?.map((t) => (
                 <Link
                   key={t}
-                  href={`/tags/${encodeURIComponent(t)}`}
+                  href={localizeHref(`/tags/${encodeURIComponent(t)}`, lang)}
                   className="rounded-full border border-rule px-2 py-0.5 hover:text-accent"
                 >
                   #{t}
@@ -84,12 +103,12 @@ export default async function BlogPostPage({
               ))}
             </div>
             <div className="hidden md:block">
-              <Eyebrow className="mb-2">Filed · หมวด</Eyebrow>
+              <Eyebrow className="mb-2">{dict.eyebrow.filed}</Eyebrow>
               <div className="font-mono text-[12px] leading-7">
                 {post.tags?.map((t) => (
                   <Link
                     key={t}
-                    href={`/tags/${encodeURIComponent(t)}`}
+                    href={localizeHref(`/tags/${encodeURIComponent(t)}`, lang)}
                     className="block hover:text-accent"
                   >
                     #{t}
@@ -98,23 +117,23 @@ export default async function BlogPostPage({
               </div>
             </div>
             <div className="hidden md:block">
-              <Eyebrow className="mb-2">Published · เผยแพร่</Eyebrow>
+              <Eyebrow className="mb-2">{dict.eyebrow.published}</Eyebrow>
               <div className="font-mono text-[12px]">
                 {formatDateMono(post.date)}
               </div>
             </div>
             <div className="hidden md:block">
-              <Eyebrow className="mb-2">Reading · เวลาอ่าน</Eyebrow>
+              <Eyebrow className="mb-2">{dict.eyebrow.reading}</Eyebrow>
               <div className="font-mono text-[12px]">
                 {formatReadingTime(post.readingTime.minutes)}
               </div>
             </div>
             <div className="hidden md:block">
               <Link
-                href="/blog"
+                href={localizeHref("/blog", lang)}
                 className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
               >
-                ← All posts
+                {dict.nav.allPosts}
               </Link>
             </div>
           </div>
@@ -122,23 +141,18 @@ export default async function BlogPostPage({
 
         <div className="min-w-0 max-w-[640px] md:order-2">
           <Link
-            href="/blog"
+            href={localizeHref("/blog", lang)}
             className="mb-3 inline-block font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground md:hidden"
           >
-            ← All posts · บทความทั้งหมด
+            {dict.nav.allPostsLong}
           </Link>
-          <header className="space-y-2">
+          <header className="space-y-2" lang={post.lang}>
             <h1 className="font-serif text-3xl font-medium leading-[1.05] tracking-tight md:text-[2.6rem]">
               {post.title}
             </h1>
-            {post.titleTh && (
-              <h2 className="font-sans text-lg font-medium leading-[1.3] text-muted-foreground md:text-2xl">
-                {post.titleTh}
-              </h2>
-            )}
           </header>
           <hr className="my-5 border-0 border-t border-rule" />
-          <div className="prose-editorial max-w-none">
+          <div className="prose-editorial max-w-none" lang={post.lang}>
             <MDXRemote
               source={post.content}
               options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
@@ -146,33 +160,42 @@ export default async function BlogPostPage({
           </div>
 
           <div className="mt-10 flex flex-wrap gap-2 border-t border-rule pt-5 font-mono text-[10px] text-muted-foreground">
-            <CopyLink slug={post.slug} />
+            <CopyLink
+              slug={post.slug}
+              canonicalPath={canonicalFor(`/blog/${post.slug}`, lang)}
+              copyLabel={dict.project.copyLink}
+              copiedLabel={dict.project.copied}
+            />
             <span className="ml-auto">j ↑ k ↓</span>
           </div>
 
           <nav className="mt-6 grid gap-3 border-t border-rule pt-5 sm:grid-cols-2">
             {prev ? (
               <Link
-                href={`/blog/${prev.slug}`}
+                href={localizeHref(`/blog/${prev.slug}`, lang)}
                 className="hover-lift block rounded border border-rule p-3 hover:text-accent"
               >
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  ← Older · เก่ากว่า
+                  {dict.card.older}
                 </div>
-                <div className="mt-1 font-serif text-sm">{prev.title}</div>
+                <div lang={prev.lang} className="mt-1 font-serif text-sm">
+                  {prev.title}
+                </div>
               </Link>
             ) : (
               <span />
             )}
             {next ? (
               <Link
-                href={`/blog/${next.slug}`}
+                href={localizeHref(`/blog/${next.slug}`, lang)}
                 className="hover-lift block rounded border border-rule p-3 text-right hover:text-accent"
               >
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  Newer · ใหม่กว่า →
+                  {dict.card.newer}
                 </div>
-                <div className="mt-1 font-serif text-sm">{next.title}</div>
+                <div lang={next.lang} className="mt-1 font-serif text-sm">
+                  {next.title}
+                </div>
               </Link>
             ) : (
               <span />
@@ -181,28 +204,23 @@ export default async function BlogPostPage({
         </div>
 
         <aside className="md:order-3">
-          <Eyebrow className="mb-2">Related · ที่เกี่ยวข้อง</Eyebrow>
+          <Eyebrow className="mb-2">{dict.eyebrow.related}</Eyebrow>
           <ul className="border-t border-rule">
             {related.length === 0 && (
               <li className="py-3 font-sans text-xs text-muted-foreground">
-                No related posts yet.
+                {dict.empty.relatedPosts}
               </li>
             )}
             {related.map((p) => (
               <li key={p.slug}>
                 <Link
-                  href={`/blog/${p.slug}`}
+                  href={localizeHref(`/blog/${p.slug}`, lang)}
                   data-post-row
                   className="hover-lift block border-b border-rule py-3 hover:text-accent focus:text-accent focus:outline-none"
                 >
-                  <div className="font-serif text-[13px] leading-[1.3]">
+                  <div lang={p.lang} className="font-serif text-[13px] leading-[1.3]">
                     {p.title}
                   </div>
-                  {p.titleTh && (
-                    <div className="font-sans text-[12px] leading-[1.4]">
-                      {p.titleTh}
-                    </div>
-                  )}
                   <div className="mt-1 font-mono text-[10px] text-muted-foreground">
                     {formatDateMono(p.date)}
                   </div>
@@ -216,9 +234,20 @@ export default async function BlogPostPage({
   );
 }
 
-function CopyLink({ slug }: { slug: string }) {
+function CopyLink({
+  slug,
+  canonicalPath,
+  copyLabel,
+  copiedLabel,
+}: {
+  slug: string;
+  canonicalPath: string;
+  copyLabel: string;
+  copiedLabel: string;
+}) {
   const id = `copy-${slug}`;
-  const script = `(function(){var b=document.getElementById('${id}');if(!b)return;b.addEventListener('click',function(){var u=window.location.origin+'/blog/${slug}';if(navigator.clipboard){navigator.clipboard.writeText(u);}var t=b.querySelector('span');if(t){var o=t.textContent;t.textContent='✓ copied';setTimeout(function(){t.textContent=o;},1400);}});})();`;
+  const safeCopied = copiedLabel.replace(/'/g, "\\'");
+  const script = `(function(){var b=document.getElementById('${id}');if(!b)return;b.addEventListener('click',function(){var u=window.location.origin+'${canonicalPath}';if(navigator.clipboard){navigator.clipboard.writeText(u);}var t=b.querySelector('span');if(t){var o=t.textContent;t.textContent='${safeCopied}';setTimeout(function(){t.textContent=o;},1400);}});})();`;
   return (
     <>
       <button
@@ -226,7 +255,7 @@ function CopyLink({ slug }: { slug: string }) {
         type="button"
         className="rounded border border-rule px-2.5 py-1 hover:text-accent"
       >
-        <span>↗ copy link</span>
+        <span>{copyLabel}</span>
       </button>
       <script dangerouslySetInnerHTML={{ __html: script }} />
     </>

@@ -25,7 +25,7 @@ export function StickyNote({ children, hint }: StickyNoteProps) {
   return (
     <aside
       onClick={() => setWiggle(true)}
-      className="hidden lg:block absolute right-6 top-2 max-w-[180px] cursor-pointer rounded-md border border-dashed border-accent bg-card px-3 py-2 font-serif text-xs italic leading-snug text-accent shadow-sm"
+      className="hidden lg:block absolute right-13 top-2 max-w-[180px] cursor-pointer rounded-md border border-dashed border-accent bg-card px-3 py-2 font-serif text-xs italic leading-snug text-accent shadow-sm"
       style={{
         transform: `rotate(${wiggle ? -3 : 6}deg)`,
         transition: "transform 220ms ease",

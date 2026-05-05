@@ -1,7 +1,10 @@
 import Link from "next/link";
 
-export function Footer() {
+import { getDict, localizeHref, type Lang } from "@/lib/i18n";
+
+export function Footer({ lang }: { lang: Lang }) {
   const year = new Date().getFullYear();
+  const dict = getDict(lang);
   return (
     <footer className="theme-fade border-t border-rule">
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-10 text-[11px] sm:grid-cols-3 sm:px-8">
@@ -17,7 +20,7 @@ export function Footer() {
 
         <div className="space-y-1.5 font-sans">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Find me · ติดต่อ
+            {dict.footer.findMe}
           </div>
           <ul className="space-y-1">
             <li>
@@ -43,27 +46,27 @@ export function Footer() {
 
         <div className="space-y-1.5 font-sans sm:text-right">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Pages · หน้า
+            {dict.footer.pages}
           </div>
           <ul className="space-y-1 text-foreground">
             <li>
-              <Link href="/blog" className="hover-lift hover:text-accent">
-                Blog · บล็อก
+              <Link href={localizeHref("/blog", lang)} className="hover-lift hover:text-accent">
+                {dict.footer.blog}
               </Link>
             </li>
             <li>
-              <Link href="/projects" className="hover-lift hover:text-accent">
-                Projects · ผลงาน
+              <Link href={localizeHref("/projects", lang)} className="hover-lift hover:text-accent">
+                {dict.footer.projects}
               </Link>
             </li>
             <li>
-              <Link href="/tags" className="hover-lift hover:text-accent">
-                Tags · แท็ก
+              <Link href={localizeHref("/tags", lang)} className="hover-lift hover:text-accent">
+                {dict.footer.tags}
               </Link>
             </li>
             <li>
-              <Link href="/about" className="hover-lift hover:text-accent">
-                About · เกี่ยวกับ
+              <Link href={localizeHref("/", lang)} className="hover-lift hover:text-accent">
+                {dict.footer.about}
               </Link>
             </li>
           </ul>
@@ -74,8 +77,7 @@ export function Footer() {
           © {year} Ariyapong Wimolnoch · Built with ❤️
         </span>
         <span className="hidden sm:inline">
-          tip: press <kbd className="border border-rule px-1.5 py-0.5">j</kbd>/
-          <kbd className="border border-rule px-1.5 py-0.5">k</kbd> to navigate posts
+          {dict.footer.tip}
         </span>
       </div>
     </footer>

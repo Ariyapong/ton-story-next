@@ -6,11 +6,22 @@ import { Eyebrow } from "@/components/eyebrow";
 import { getAllTags, getPostsByTag } from "@/lib/blog";
 import { formatDateMono, formatReadingTime } from "@/lib/format";
 import { tagTh } from "@/lib/tag-translations";
+import {
+  LANGS,
+  canonicalFor,
+  getDict,
+  hreflangAlternates,
+  isLang,
+  localizeHref,
+  ogLocale,
+} from "@/lib/i18n";
 
-type Params = { tag: string };
+type Params = { lang: string; tag: string };
 
 export function generateStaticParams() {
-  return getAllTags().map(({ tag }) => ({ tag: encodeURIComponent(tag) }));
+  return LANGS.flatMap((lang) =>
+    getAllTags().map(({ tag }) => ({ lang, tag: encodeURIComponent(tag) })),
+  );
 }
 
 export async function generateMetadata({
@@ -18,12 +29,22 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { tag } = await params;
+  const { lang, tag } = await params;
+  if (!isLang(lang)) return {};
   const decoded = decodeURIComponent(tag);
+  const label = lang === "th" ? tagTh(decoded) : decoded;
+  const path = `/tags/${encodeURIComponent(decoded)}`;
   return {
-    title: `#${decoded} · ${tagTh(decoded)}`,
-    description: `Posts tagged #${decoded}.`,
-    alternates: { canonical: `/tags/${encodeURIComponent(decoded)}` },
+    title: `#${label}`,
+    description:
+      lang === "th"
+        ? `บทความที่ติดแท็ก #${label}`
+        : `Posts tagged #${label}.`,
+    alternates: {
+      canonical: canonicalFor(path, lang),
+      languages: hreflangAlternates(path),
+    },
+    openGraph: { locale: ogLocale(lang) },
   };
 }
 
@@ -32,29 +53,32 @@ export default async function TagPage({
 }: {
   params: Promise<Params>;
 }) {
-  const { tag } = await params;
+  const { lang, tag } = await params;
+  if (!isLang(lang)) notFound();
+  const dict = getDict(lang);
   const decoded = decodeURIComponent(tag);
   const posts = getPostsByTag(decoded);
   if (posts.length === 0) notFound();
+  const tagLabel = lang === "th" ? tagTh(decoded) : decoded;
 
   return (
     <div className="space-y-8">
       <header className="space-y-2 border-b border-rule pb-5">
         <Link
-          href="/tags"
+          href={localizeHref("/tags", lang)}
           className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
         >
-          ← All tags · แท็กทั้งหมด
+          {dict.nav.allTags}
         </Link>
         <Eyebrow>
-          Filtered · กรอง: <span className="text-foreground">#{decoded}</span>{" "}
-          <span className="text-foreground">· {tagTh(decoded)}</span>
+          {dict.eyebrow.filtered}:{" "}
+          <span className="text-foreground">#{tagLabel}</span>
         </Eyebrow>
         <h1 className="font-serif text-4xl font-medium italic md:text-5xl">
-          #{decoded}
+          #{tagLabel}
         </h1>
         <p className="font-mono text-[11px] text-muted-foreground">
-          {posts.length} entr{posts.length === 1 ? "y" : "ies"}
+          {dict.counter.entriesPlural(posts.length)}
         </p>
       </header>
 
@@ -62,22 +86,23 @@ export default async function TagPage({
         {posts.map((post) => (
           <li key={post.slug}>
             <Link
-              href={`/blog/${post.slug}`}
+              href={localizeHref(`/blog/${post.slug}`, lang)}
               data-post-row
               className="hover-lift grid grid-cols-[1fr_auto] gap-x-4 border-b border-rule py-4 hover:text-accent focus:text-accent focus:outline-none md:grid-cols-[100px_1fr_120px]"
             >
-              <span className="order-2 font-mono text-[11px] text-muted-foreground md:order-1">
-                {formatDateMono(post.date)}
+              <span className="order-2 flex items-baseline gap-2 font-mono text-[11px] text-muted-foreground md:order-1">
+                <span>{formatDateMono(post.date)}</span>
+                <span className="rounded-full border border-rule px-1.5 py-px text-[9px] uppercase tracking-wide">
+                  {post.lang.toUpperCase()}
+                </span>
               </span>
-              <span className="order-1 col-span-2 md:order-2 md:col-span-1">
+              <span
+                lang={post.lang}
+                className="order-1 col-span-2 md:order-2 md:col-span-1"
+              >
                 <span className="block font-serif text-lg leading-[1.25]">
                   {post.title}
                 </span>
-                {post.titleTh && (
-                  <span className="block font-sans text-[14px] leading-[1.45] text-muted-foreground">
-                    · {post.titleTh}
-                  </span>
-                )}
               </span>
               <span className="order-3 text-right font-mono text-[10px] text-muted-foreground">
                 {formatReadingTime(post.readingTime.minutes)}
