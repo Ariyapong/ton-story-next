@@ -1,0 +1,41 @@
+---
+title: "Docnav"
+summary: "Cmd+K command palette กับ outline ติดข้างจอ ใช้ได้กับเว็บ docs ทุกเว็บ"
+date: "2026-05-03"
+year: "26"
+stack: ["Chrome MV3", "TypeScript", "Vite", "Shadow DOM"]
+repo: "https://github.com/Ariyapong/docnav"
+featured: true
+---
+
+ส่วนเสริม Chrome ที่ผมทำเพราะผมเปิด MDN, React docs, Next docs และ Tailwind docs
+วันละเป็นร้อยครั้ง และสิ่งเดียวที่มันเหมือนกันคือ — หา heading ที่ต้องการก็ลำบากทุกที
+
+## มันทำอะไร
+
+- **⌘⇧K** เปิด command palette แบบ fuzzy ที่ครอบ `h1`–`h4` ทั้งหน้า
+  พิมพ์ไม่กี่ตัวอักษร กด Enter เลื่อนหน้าไปจุดนั้นทันที
+- **⌘⇧O** เปิด/ปิด outline panel ติดข้างจอ ที่จะ highlight section ปัจจุบัน
+  ตามที่คุณเลื่อน รองรับการใช้คีย์บอร์ดเต็มรูปแบบ (↑↓, Enter, Esc, Home/End)
+- หน้า docs ที่เพิ่งเปิดไปจะโผล่ขึ้นมาใน palette กับใน popup ทำให้กลับไปได้
+  โดยไม่ต้องจำ URL
+- เปิด/ปิดต่อเว็บได้ พร้อม theme toggle System / Light / Dark ที่ sync แบบ live
+  ไปทุก tab ที่เปิดอยู่
+
+## วิธีสร้าง
+
+- Manifest V3, TypeScript, Vite + `@crxjs/vite-plugin`
+- UI ทั้งหมดอยู่ใน **shadow DOM** เพื่อให้ CSS ของหน้าเว็บแม่เข้าไม่ถึง
+  (และในทางกลับกัน) — ไม่ต้องไปสู้กับ Tailwind ของเว็บ docs หรืออะไรก็ตามที่
+  vendor ใส่มา
+- Vanilla DOM ใน content script ไม่ใช้ React — bundle เล็กมาก shadow root
+  ไม่มี runtime ของ framework ให้กังวล
+- เก็บข้อมูลผ่าน `chrome.storage.local` พร้อม `chrome.storage.onChanged`
+  เพื่อให้ popup กับทุก tab sync กันโดยไม่ต้องเดินสายส่งข้อความเอง
+
+## ทำไมถึงตั้งใจให้มันเล็ก
+
+ส่วนเสริมเบราว์เซอร์ส่วนใหญ่ที่ผมเคยลงไว้ ทำเรื่องที่มีประโยชน์เรื่องเดียว
+ฝังอยู่ใต้หน้า settings เจ็ดหน้า docnav พยายามทำตรงข้าม — สองคีย์ลัด
+หนึ่ง popup ไม่มี account ไม่มี sync ถ้าหนึ่งเดือนผ่านไปผมลืมวิธีใช้
+README ก็พอดีหนึ่งจอจบ

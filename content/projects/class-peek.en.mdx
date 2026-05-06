@@ -1,17 +1,21 @@
 ---
 title: "Class Peek"
-summary: "VSCode extension — cmd-click any class name through clsx/cva/Tailwind and jump to its CSS."
-date: "2026-05-05"
+summary: "VSCode extension — ⌘/Ctrl-click any class through clsx/cva/Tailwind, or hover for inline CSS. Shipping on the Marketplace."
+date: "2026-05-06"
 year: "26"
 stack: ["VSCode API", "TypeScript", "AST", "Tailwind v4"]
 featured: true
 link: "https://marketplace.visualstudio.com/items?itemName=Aritoton.class-peek"
 ---
 
-A small VSCode extension that lets you `⌘`-click any class name in a
-JSX/TSX file and jump straight to where it's defined, even when the
-class is buried inside a `clsx` / `cn` / `classnames` / `cva` / `tv`
-wrapper.
+A small VSCode extension that lets you `⌘`-click (or `Ctrl`-click on
+Windows/Linux) any class name in a JSX/TSX file and jump straight to
+where it's defined — even when the class is buried inside a `clsx` /
+`cn` / `classnames` / `cva` / `tv` wrapper. Or just **hover** for an
+inline preview without leaving the line.
+
+Currently shipping on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Aritoton.class-peek)
+as `aritoton.class-peek`.
 
 ## Why it exists
 
@@ -23,20 +27,29 @@ the class moves out of a plain string literal.
 
 [issue]: https://github.com/pranaygp/vscode-css-peek/issues/82
 
-## MVP scope
+## What ships today
 
-- **AST traversal** through the class-helper wrappers, so the click
-  target works the same whether you write `className="p-4"` or
-  `className={cn("p-4", isActive && "bg-accent")}`.
-- **Tailwind v4 reverse lookup** via `@theme` — clicking `bg-accent`
-  resolves the CSS variable back to its definition in your tokens.
-- Out of scope for v0.1: hover preview, find-references, rename,
-  SCSS `&` nesting, styled-components, CSS Modules. The Modules
-  space is already saturated (typescript-plugin-css-modules,
-  react-ts-css, css-modules-kit) — no point fighting there.
+- **AST traversal through helpers** — works the same whether you write
+  `className="p-4"` or `className={cn("p-4", isActive && "bg-accent")}`.
+  Configurable helper list so your codebase's custom wrapper joins
+  the party.
+- **Tailwind v4 `@theme` reverse lookup** — `bg-accent` resolves to
+  `--color-accent`; `text-lg` to `--text-lg`. Spacing utilities fall
+  back to the bare `--spacing` calc base when no specific value is
+  defined. Hyphenated sub-prefixes (`gap-x-4`, `space-y-2`) and
+  negative utilities (`-mt-4`) all resolve to the right token.
+- **`@apply` chain peek** — `⌘`-click `btn` and you see both the
+  `.btn` rule itself *and* every rule that composes it via `@apply`,
+  in one peek panel.
+- **Hover preview** *(v0.2)* — hover any class to see the resolved
+  CSS inline: rule body for plain classes, the `@theme` declaration
+  for Tailwind tokens, the composing rules for `@apply` hits.
+  No jump required.
 
 ## Why small on purpose
 
 One hotkey, one job. If it can't replace CSS Peek for the cases
 CSS Peek already handles, that's fine — the wedge is the cases it
-*doesn't*.
+*doesn't*. Things still deliberately out of scope: find-references,
+rename, SCSS `&`-nesting, styled-components, monorepo path resolution.
+Each of those is its own project.

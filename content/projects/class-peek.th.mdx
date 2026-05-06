@@ -1,0 +1,54 @@
+---
+title: "Class Peek"
+summary: "ส่วนเสริม VSCode — กด ⌘/Ctrl + คลิกชื่อ class ใน clsx/cva/Tailwind หรือ hover เพื่อดู CSS แบบ inline ขึ้นอยู่บน Marketplace แล้ว"
+date: "2026-05-06"
+year: "26"
+stack: ["VSCode API", "TypeScript", "AST", "Tailwind v4"]
+featured: true
+link: "https://marketplace.visualstudio.com/items?itemName=Aritoton.class-peek"
+---
+
+ส่วนเสริม VSCode เล็ก ๆ ให้กด `⌘` + คลิก (หรือ `Ctrl` + คลิกบน Windows/Linux)
+ที่ชื่อ class ในไฟล์ JSX/TSX แล้วกระโดดไปยังจุดที่มันถูกประกาศได้เลย —
+ถึงแม้ class จะอยู่ใน helper function อย่าง `clsx` / `cn` / `classnames` /
+`cva` / `tv` ก็ยังใช้ได้ หรือถ้าไม่อยากกระโดด — แค่ **hover** ก็เห็น CSS
+แบบ inline ตรงนั้นเลย
+
+ตอนนี้อยู่บน [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Aritoton.class-peek)
+ในชื่อ `aritoton.class-peek` แล้วครับ
+
+## ทำไมถึงมีสิ่งนี้
+
+`CSS Peek` ตัวเดิมก็ดีนะครับ แต่ [issue #82][issue]
+(*"add support for clsx/classnames"*) เปิดค้างมาตั้งแต่กรกฎา 2020 —
+นั่นแหละจุดเจ็บ ทุกโปรเจกต์ที่ผมแตะต้องที่ทำงานใช้ helper พวกนี้กันหมด
+พอ class หลุดออกจาก string literal ปุ๊บ peek-definition ก็เงียบทันที
+
+[issue]: https://github.com/pranaygp/vscode-css-peek/issues/82
+
+## ที่ ship แล้วตอนนี้
+
+- **เดินผ่าน AST ของ helper** ทำงานได้เหมือนกันไม่ว่าจะเขียน
+  `className="p-4"` หรือ `className={cn("p-4", isActive && "bg-accent")}`
+  รายการ helper config ได้ ถ้า codebase ของคุณมี wrapper ของตัวเองก็ใส่
+  เข้ามาร่วมวงได้
+- **Reverse lookup สำหรับ Tailwind v4 ผ่าน `@theme`** — `bg-accent`
+  resolve กลับไปที่ `--color-accent`; `text-lg` ไปที่ `--text-lg`;
+  utility ของ spacing fall back ไปที่ `--spacing` calc base ถ้าไม่มี
+  ค่า specific ไว้ sub-prefix แบบ hyphenated (`gap-x-4`, `space-y-2`)
+  และ utility แบบติดลบ (`-mt-4`) ก็ resolve ไปที่ token ที่ถูกต้อง
+- **Peek `@apply` chain** — `⌘` + คลิกที่ `btn` แล้วจะเห็นทั้ง rule
+  `.btn` เอง *และ* rule อื่น ๆ ที่ใช้ `@apply` ประกอบมัน อยู่ใน peek
+  panel เดียวกัน
+- **Hover preview** *(v0.2)* — hover ที่ class ไหนก็ได้เพื่อดู CSS ที่
+  resolve แล้วแบบ inline — rule body สำหรับ class ธรรมดา, declaration
+  ของ `@theme` สำหรับ Tailwind token, rule ที่ประกอบกันสำหรับ
+  `@apply` ไม่ต้องกระโดดไปไหน
+
+## ตั้งใจให้เล็ก
+
+หนึ่งคีย์ลัด หนึ่งหน้าที่ ถ้ามันแทน CSS Peek ในเคสที่ CSS Peek ทำได้อยู่แล้ว
+ไม่ได้ ก็ไม่เป็นไร — wedge ของมันคือเคสที่ CSS Peek *ทำไม่ได้* ต่างหาก
+สิ่งที่ตัดออกอย่างจงใจ: find-references, rename, SCSS `&`-nesting,
+styled-components, monorepo path resolution แต่ละอันก็คือมี project ของ
+ตัวมันเองอยู่แล้ว

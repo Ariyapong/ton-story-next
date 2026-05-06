@@ -1,0 +1,52 @@
+---
+title: "Ton Story"
+summary: "เว็บนี้เอง — พอร์ตโฟลิโอ + บล็อกสองภาษา ด้วย Next 15, Tailwind v4, MDX"
+date: "2022-09-05"
+year: "22"
+stack: ["Next.js", "TypeScript", "Tailwind v4", "MDX"]
+repo: "https://github.com/Ariyapong/ton-story-next"
+featured: true
+---
+
+เว็บที่คุณกำลังดูอยู่นี้ — สองภาษา EN/TH สไตล์ editorial มี theme สามตัว
+(milk, coffee, tea) และหน้า `/bio` ที่ตั้งใจไม่ใส่สไตล์เลย เป็นมุกเล็ก ๆ
+สำหรับคนที่เปิด source ดู
+
+## มันคืออะไร
+
+- หนึ่ง repo ใช้ Next.js 15 App Router, React 19
+- บทความและโปรเจกต์เก็บเป็นไฟล์ `.mdx` ใน `content/` บทความเขียนภาษาเดียว
+  ต่อโพสต์ (กำหนดผ่าน `lang:` ใน frontmatter) ส่วนโปรเจกต์มี `.en.mdx`
+  คู่กับ `.th.mdx`
+- Theme สามตัว (milk / coffee / tea) ทำผ่าน CSS variables ไม่ swap class
+  ด้วย JS แค่ตั้ง `data-theme` บน html ที่เหลือเป็นเรื่องของ CSS ล้วน ๆ
+- IBM Plex Serif คู่กับ Plex Sans Thai Looped เลือกเพราะ x-height
+  และจังหวะบรรทัดของอักษรไทยกับอังกฤษเข้ากัน ไม่ต้องแก้ line-height ทีละ block
+
+## ทำไมถึงรื้อสร้างใหม่
+
+เวอร์ชันก่อนเป็น next starter template ที่ผมปรับแต่งยากและรู้สึกไม่ค่อยเข้ากับมัน การแก้มันรู้สึก
+เหมือนตกแต่งห้องในโรงแรม สร้างใหม่จากศูนย์ทำให้โครงสร้างตรงกับวิธีที่ผมเขียนจริง ๆ
+— และทำให้ผมเลือกการตัดสินใจที่ "น่าเบื่อ" ได้อย่างตั้งใจ (ไม่มี CMS,
+ไม่มี analytics, ไม่มี auth)
+
+## สองภาษาทำงานยังไง
+
+หนึ่งภาษาต่อหนึ่งหน้า ภาษาอังกฤษคือ canonical: URL เปล่า
+(`/projects/class-peek`) คือเวอร์ชันอังกฤษ ภาษาไทยใช้ prefix `/th/`
+(`/th/projects/class-peek`) ตัวสลับ `EN | TH` เล็ก ๆ บน header
+จะคงเส้นทางปัจจุบันไว้ตอนสลับ — ไม่ทำให้ลิงก์ลึกพังข้ามภาษา
+
+บทความบล็อกเขียนภาษาเดียวต่อโพสต์ผ่าน frontmatter หน้า index แสดงทุกบทความ
+ไม่ว่าตอนนั้นจะเลือก EN หรือ TH โดยมี chip `EN`/`TH` เล็ก ๆ บนแต่ละการ์ด
+ให้ผู้อ่านเห็นคลังเขียนทั้งหมดและเลือกเอง ส่วนชื่อแบรนด์ `Aritoton · อริโตต้น`
+คือจุดเดียวที่ตั้งใจให้สองภาษาคู่กันตลอด
+
+## หมายเหตุเรื่อง stack
+
+- Tailwind v4 พร้อม `@theme` สำหรับ token เดียวกันนี้ขับ theme สามตัว และ
+  (แยกกัน) Class Peek ใช้ reverse lookup กลับมาหา token ตัวเดียวกันนี้
+- MDX ผ่าน `next-mdx-remote/rsc` — บทความ render ฝั่ง server แบบ static
+  ไม่มี client runtime สำหรับเนื้อหาเลย
+- Sitemap ปล่อย URL ทั้งแบบเปล่าและ `/th/` ต่อหนึ่งหน้า พร้อม hreflang
+  alternates แต่ละภาษามี canonical เดียว ไม่มีปัญหา duplicate content

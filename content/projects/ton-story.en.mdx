@@ -8,19 +8,47 @@ repo: "https://github.com/Ariyapong/ton-story-next"
 featured: true
 ---
 
-The site you're looking at. Bilingual EN/TH editorial layout with three
-themes (milk, coffee, tea) and an unstyled `/` homepage as a small joke for
-anyone who reads source.
+The site you're looking at. Bilingual EN/TH editorial layout, three themes
+(milk, coffee, tea), and a deliberately unstyled `/bio` page as a small
+joke for anyone who reads source.
 
 ## What it is
 
 - One repo. Next.js 15 App Router, React 19.
-- Posts and projects as `.mdx` files in `content/`.
-- Three themes wired through CSS variables — no JS class swapping.
-- IBM Plex Serif + Plex Sans Thai Looped for matching bilingual rhythm.
+- Posts and projects as `.mdx` files in `content/`. Posts are
+  single-language (EN or TH set via `lang:` frontmatter); projects come as
+  paired `.en.mdx` / `.th.mdx` files.
+- Three themes (milk / coffee / tea) wired through CSS variables. No JS
+  class swapping — just `data-theme` on the html element, the rest is CSS.
+- IBM Plex Serif + Plex Sans Thai Looped, picked so EN and TH glyphs
+  share an x-height and a baseline rhythm.
 
 ## Why I built it from scratch
 
-The previous version was a starter template I never grew into. Editing it
-felt like decorating a hotel room. Building from scratch lets the structure
-match how I actually write.
+The previous version was a starter template It hard to adjust, never grew into. Editing it
+felt like decorating a hotel room. Building from scratch let the structure
+match how I actually write — and let me make boring decisions on purpose
+(no CMS, no analytics, no auth).
+
+## How the bilingual works
+
+One language at a time per page. EN is the canonical: the bare URL
+(`/projects/class-peek`) is English. Thai gets a `/th/` prefix
+(`/th/projects/class-peek`). A small `EN | TH` switcher in the header
+preserves the current path when you flip — no broken deep links across
+languages.
+
+Blog posts are single-language by frontmatter. The index shows all of them
+regardless of switcher state, with a small `EN`/`TH` chip per card so the
+reader sees the full archive and self-selects. The brand mark
+`Aritoton · อริโตต้น` is the one place that stays bilingual side-by-side
+on purpose.
+
+## Stack-specific notes
+
+- Tailwind v4 with `@theme` for tokens. The same tokens drive the three
+  themes and, separately, Class Peek's reverse lookup.
+- MDX via `next-mdx-remote/rsc` — posts render server-side, fully static,
+  zero client runtime for prose.
+- Sitemap emits bare and `/th/` URLs per page with hreflang alternates.
+  One canonical per language, no duplicate-content trouble.
