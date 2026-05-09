@@ -1,0 +1,577 @@
+---
+title: "Cloudflare DDNS on a Raspberry Pi, behind CGNAT"
+date: "2026-05-09"
+excerpt: "What started as 'just point Cloudflare at my Pi' turned into a tour of every gotcha in the stack: a broken DDNS provider, a discontinued apt repo, a misconfigured build, CGNAT, and a leaked API token. Here's the path through all of it."
+tags: ["raspberry-pi", "ddclient", "cloudflare", "ddns", "ssh", "self-hosting", "networking"]
+lang: "en"
+---
+
+For about five years my home Raspberry Pi has been quietly answering on
+`tonykrub.dynv6.net`. I'd push a file from a coffee shop, pull one from
+the office, browse it from my phone on the train. It just worked.
+
+Until it didn't.
+
+Some time over the last few months `dynv6` quietly stopped recognizing my
+hostname. The Pi kept dutifully trying to update it, and `journalctl`
+filled up with the same line every five minutes:
+
+```
+FAILED:  updating tonykrub.dynv6.net: nohost:
+The hostname specified does not exist in the database.
+```
+
+I'd been meaning to migrate to my own domain anyway — I bought
+`yourdomain.com` for my personal site recently and had a Cloudflare
+account just sitting there. So this was the push.
+
+What I assumed would be a thirty-minute swap turned into a multi-hour
+debugging session through every layer of the stack: a stale `ddclient`
+version, a discontinued Debian repo, a build that installed everything
+in the wrong place, the realization that I'm behind carrier-grade NAT,
+shell quoting that silently dropped my IPv4, and — embarrassingly — a
+leaked API token I had to rotate mid-stream.
+
+This post is the path I wish I'd had at the start. If your dynv6 (or any
+DDNS provider) just died and you want to switch to Cloudflare on a Pi —
+especially one behind CGNAT — this is for you.
+
+## The plan, on paper
+
+Conceptually, dynamic DNS on Cloudflare is straightforward:
+
+1. You own a domain managed by Cloudflare.
+2. You create an `A` record (IPv4) and `AAAA` record (IPv6) for some
+   subdomain — say `my-file-server.yourdomain.com`.
+3. You give a small daemon on the Pi an API token scoped to that zone.
+4. The daemon checks your public IP every few minutes and updates the
+   records via the Cloudflare API when it changes.
+
+`ddclient` is the canonical daemon for this on Debian-family systems.
+That's what I'd been using with dynv6, so the migration is "just"
+swapping the protocol block in `/etc/ddclient.conf`.
+
+That was the plan. Reality had opinions.
+
+## The SFTP gotcha (don't proxy)
+
+Before any DDNS work, one thing I almost got wrong: **Cloudflare's
+proxy (the orange cloud) only proxies HTTP/HTTPS.** It does not pass
+SFTP, SSH, or anything else on port 22.
+
+If you flip the proxy on for your DNS record, your domain will resolve
+to a Cloudflare edge IP that politely drops your SSH connection. Easy
+to miss because the record looks fine in the dashboard.
+
+For a self-hosted SFTP server, the records must be set to **DNS only
+(grey cloud)**. Your home's real public IP becomes visible — same as
+it was with dynv6. That's the trade-off.
+
+```
+Type   Name   Content        Proxy
+A      pi     <placeholder>  DNS only
+AAAA   pi     <placeholder>  DNS only
+```
+
+The placeholder values get overwritten by the daemon on first run.
+What matters is that the records exist and are grey.
+
+## The ddclient version trap
+
+My Pi was running Raspberry Pi OS Bullseye, which ships `ddclient`
+3.9.1. That version technically *mentions* Cloudflare in the protocol
+list, but its support for **API tokens** (the scoped, modern auth
+method Cloudflare actually wants you to use) is incomplete. Token
+auth landed properly in `ddclient` 3.10.
+
+You can still talk to Cloudflare from 3.9.1 using the legacy **Global
+API Key** — but the Global Key has full access to your entire
+Cloudflare account. Every domain. Every setting. If a Pi exposed to
+the internet ever gets compromised, the attacker owns your Cloudflare.
+For a hobby setup behind a router, the realistic risk is low. But it's
+strictly worse than a scoped token, and "strictly worse" tends to
+become "actually bad" at some point.
+
+So: upgrade `ddclient` first.
+
+## Backports is gone
+
+The textbook way to upgrade a Debian package is `bullseye-backports`.
+I added the source:
+
+```
+echo "deb http://deb.debian.org/debian bullseye-backports main" | \
+  sudo tee /etc/apt/sources.list.d/bullseye-backports.list
+sudo apt update
+```
+
+And got back:
+
+```
+Err:4 http://deb.debian.org/debian bullseye-backports Release
+  404 Not Found
+```
+
+Bullseye moved to LTS, and `bullseye-backports` was retired with it.
+The packages now live on `archive.debian.org`, but availability is
+patchy and the URL dance isn't worth it. The cleanest path is to build
+`ddclient` from source — which sounds dramatic, but `ddclient` is a
+single Perl script. There's nothing to compile.
+
+## Building from source (and the prefix trap)
+
+Grab the source archive from GitHub:
+
+```
+cd /tmp
+wget https://github.com/ddclient/ddclient/archive/refs/tags/v3.11.2.tar.gz
+tar xzf v3.11.2.tar.gz
+cd ddclient-3.11.2
+```
+
+The repository ships `ddclient.in` — a template that becomes the
+runnable script after `./configure` substitutes a few values. Install
+the build tools:
+
+```
+sudo apt install -y autoconf automake make
+```
+
+And here is the trap. The natural thing to type is:
+
+```
+./autogen
+./configure
+make
+sudo cp ddclient /usr/sbin/ddclient
+```
+
+This works. The script runs. And then it can't find your config:
+
+```
+WARNING:  file /usr/local/etc/ddclient.conf:
+Cannot open file. (No such file or directory)
+```
+
+Because `./configure` defaults to `--prefix=/usr/local`, the new
+binary looks for its config at `/usr/local/etc/ddclient.conf`. But
+your existing `/etc/ddclient.conf`, your existing systemd unit, and
+your existing `/var/cache/ddclient/` are all in the Debian-conventional
+locations — `/etc`, `/var`. The fix is to point `configure` at those
+explicitly:
+
+```
+make distclean
+./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var
+make
+sudo cp ddclient /usr/sbin/ddclient
+sudo chmod 755 /usr/sbin/ddclient
+ddclient --version    # should print 3.11.2 or newer
+```
+
+One small caveat that comes with this path: `sudo apt upgrade` will
+no longer update `ddclient`, because it's no longer the apt-managed
+copy. `ddclient` is stable enough that this is a once-every-couple-of-years
+problem, not a real maintenance burden. Still — write it on a sticky
+note somewhere.
+
+## The first config
+
+With a token-aware `ddclient`, the config is short:
+
+```
+# /etc/ddclient.conf
+daemon=300
+syslog=yes
+pid=/run/ddclient.pid
+ssl=yes
+
+protocol=cloudflare
+zone=yourdomain.com
+ttl=1
+login=token
+password='YOUR_CLOUDFLARE_API_TOKEN'
+
+usev4=webv4, webv4=https://api.ipify.org/
+usev6=ifv6, ifv6=wlan0
+
+my-file-server.yourdomain.com
+```
+
+A few things in here are worth knowing:
+
+- `login=token` is literally the word "token" — that's how `ddclient`
+  knows the password is an API token, not a Global Key.
+- `usev4=webv4, webv4=...` asks an external service for your public
+  IPv4. `usev6=ifv6, ifv6=wlan0` reads IPv6 directly off your wireless
+  interface. (The older `usev6=if` syntax still works but throws a
+  deprecation warning in 3.11.)
+- The hostname (`my-file-server.yourdomain.com`) is the **last** non-blank line
+  in the block. `ddclient` parses everything above it as settings for
+  that host.
+- `chmod 600` the file — your token is in it.
+
+I mention this because my first attempt had **two separate blocks**
+for the same hostname (one for IPv4, one for IPv6, in the style of
+older configs). In 3.11+ those get merged in a way that silently
+disables IPv4. The single-block, dual-stack form is the right one.
+
+## The first run
+
+Always test with `ddclient` running in the foreground, not as a daemon
+under systemd. The foreground output is far more useful:
+
+```
+sudo rm -f /var/cache/ddclient/ddclient.cache
+sudo ddclient -daemon=0 -debug -verbose -noquiet
+```
+
+I cleared the cache because it carried stale dynv6 state. Without
+that, `ddclient` thinks it already updated everything and skips the
+real work.
+
+What I wanted to see was two `SUCCESS:` lines. What I got was one:
+
+```
+SUCCESS:  updating my-file-server.yourdomain.com: IPv6 address set to 2001:db8::...
+```
+
+The IPv4 update was missing entirely. No `FAILED`, no warning, just
+absent. That's the moment I started learning about CGNAT.
+
+## CGNAT, the quiet IPv4 problem
+
+Two quick checks revealed the situation:
+
+```
+$ curl -4 https://api.ipify.org
+171.96.X.X
+$ ssh -p 22 my-username@171.96.X.X    # from a phone on mobile data
+ssh: connect to host 171.96.X.X port 22: Operation timed out
+```
+
+The IP looks public — it's in True's residential range — but inbound
+to it doesn't reach my house. The router admin page told the rest of
+the story: the WAN interface had an address starting with `100.x`,
+which is the
+[100.64.0.0/10](https://en.wikipedia.org/wiki/IPv4_shared_address_space)
+range reserved for **carrier-grade NAT**. Outbound traffic from the
+Pi appears to come from True's shared public IP. Inbound on that IP
+gets dropped at True's edge before it ever reaches my router.
+
+That explains a lot. It explains why I had a separate True DDNS
+hostname configured years ago (True provides a port-forwarding
+"DDNS bridge" service specifically for CGNAT customers). It also
+explains why my old `ddclient` config had this oddity:
+
+```
+use=cmd, cmd='dig +short your-handle.trueddns.com'
+```
+
+It was telling `ddclient` to ignore the Pi's own IP and instead use
+whatever IP True's bridge service was advertising — that's the IP
+that True's network actually routes inbound traffic to my home for.
+
+For the Cloudflare migration, I had three real options:
+
+1. **IPv6-only.** Drop the A record entirely. Works as long as every
+   client (laptop, phone on mobile, hotel Wi-Fi) has IPv6 — which is
+   not always true.
+2. **Pay True for a real public IPv4.** Most Thai ISPs offer this
+   for ~100–300 THB/month. Clean fix; costs money.
+3. **Reuse True's DDNS bridge** as the IPv4 source. Cloudflare's `A`
+   record gets pointed at the bridge IP; True's port-forwarding does
+   the actual routing into my house.
+
+I went with option 3, since the bridge was still working and it kept
+the IPv4 path open for free.
+
+## Bridging True DDNS into Cloudflare
+
+The natural move is to plug the `dig` command directly into
+`ddclient`'s `cmdv4`:
+
+```
+usev4=cmdv4, cmdv4='dig +short your-handle.trueddns.com'
+```
+
+This is roughly correct — and yet it produced one of the more
+mysterious errors of the day:
+
+```
+WARNING: curl cannot connect to https://api.cloudflare.com using IPv0
+FAILED:  updating my-file-server.yourdomain.com:
+Could not connect to api.cloudflare.com/client/v4.
+```
+
+"IPv0." That's not a thing. It's how `ddclient` formats an error
+when its IP-version detection has produced something it can't parse.
+The shell quoting of the inline command was the suspect — `ddclient`
+runs `cmdv4` through a subshell, and pipes / quotes / spaces inside
+quotes inside a config file is a chain of small fragilities.
+
+The cleanest workaround is to put the command in a tiny script:
+
+```sh
+# /usr/local/bin/get-true-ip.sh
+#!/bin/sh
+dig +short your-handle.trueddns.com | grep -E '^[0-9.]+$' | head -1
+```
+
+```
+sudo chmod 755 /usr/local/bin/get-true-ip.sh
+```
+
+The `grep` strips anything that isn't an IPv4 (defensive — if `dig`
+ever returns a CNAME chain or a comment line, we keep just the IP).
+The `head -1` trims to a single line. Then `ddclient` calls one path,
+no shell drama:
+
+```
+usev4=cmdv4, cmdv4='/usr/local/bin/get-true-ip.sh'
+```
+
+After this swap, the foreground test produced both `SUCCESS:` lines.
+A `dig` from my laptop returned the bridge IP for the A record and
+my home's IPv6 for the AAAA. SFTP from a phone on mobile data
+landed at the login prompt. The DDNS layer was done.
+
+## The token I leaked at myself
+
+In the middle of all this, I asked AI to help me read the debug
+log. I pasted it into the chat verbatim. The log included this line:
+
+```
+header="Authorization: Bearer cfut_..."
+```
+
+Right there, in plaintext, on a screen I'd shared with an LLM and
+might also forward to a friend or paste into an issue tracker.
+Cloudflare API tokens don't expire on their own; whoever has the
+string can edit your DNS until you revoke it.
+
+I rotated the token immediately — Cloudflare → My Profile → API
+Tokens → roll/recreate, copy the new value, paste it into
+`/etc/ddclient.conf`, restart the daemon. Total time: about ninety
+seconds. Total possible exposure: small, but real.
+
+The lesson generalizes. Anything that looks like `Bearer ...`,
+`xoxb-...`, `ghp_...`, `sk-...`, `AKIA...` is a credential. Treat
+debug logs the way you'd treat the screenshot of a bank statement.
+For future paste-friendly debug runs, pipe through `sed` to scrub
+the line:
+
+```
+sudo ddclient -daemon=0 -debug -verbose -noquiet 2>&1 \
+  | sed 's/Bearer [^"]*/Bearer REDACTED/' \
+  | tee /tmp/ddclient-test.log
+```
+
+Worth normalizing as a habit, not just a one-time fix.
+
+## Hardening SSH
+
+With the Pi's hostname now resolving and the daemon happily updating
+both records, port 22 was once again reachable from the internet.
+Which means the bot scanners would find it within minutes — that's
+not a guess, that's just how the internet works now.
+
+Two layers handle this well:
+
+1. **Make brute-force impossible** by disabling password auth and
+   only accepting SSH keys.
+2. **Make scanning expensive** by automatically firewalling IPs that
+   try to brute-force.
+
+The order matters and the safety habits matter more.
+
+### The order
+
+Generate (or reuse) an SSH key on your laptop. Copy the public half
+to the Pi. **Verify key login works.** Only then disable passwords.
+If you skip the verify step you can lock yourself out — with no
+password fallback, a typo in `sshd_config` becomes a walk to the Pi
+with a USB keyboard.
+
+```
+# on your laptop
+ssh-keygen -t ed25519
+ssh-copy-id admin@my-file-server.yourdomain.com
+ssh admin@my-file-server.yourdomain.com    # must succeed without a password
+```
+
+A wrinkle for me: I have a separate SFTP-only user (`sftpuser`) that
+my file-manager apps use. It's chrooted to its home directory with
+`ForceCommand internal-sftp`, which means `ssh-copy-id` can't work
+for it (the SFTP-only restriction blocks the shell command that
+`ssh-copy-id` uses to append the key). The fix is to install the
+key manually from the admin account:
+
+```
+# from the laptop, copy your public key text
+cat ~/.ssh/id_ed25519.pub
+
+# on the Pi, as the admin user
+sudo mkdir -p /home/sftpuser/.ssh
+sudo nano /home/sftpuser/.ssh/authorized_keys     # paste, save
+sudo chmod 700 /home/sftpuser/.ssh
+sudo chmod 600 /home/sftpuser/.ssh/authorized_keys
+sudo chown -R sftpuser:sftpuser /home/sftpuser/.ssh
+```
+
+Permissions matter — sshd silently ignores `authorized_keys` files
+that are too permissive. `700` on the directory, `600` on the file.
+
+### The hardening
+
+Edit `/etc/ssh/sshd_config`:
+
+```
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3
+LoginGraceTime 20
+ClientAliveInterval 300
+ClientAliveCountMax 2
+AllowUsers admin sftpuser
+```
+
+The `AllowUsers` line is a hard whitelist. If you have a `Match User`
+block lower in the file (the SFTP chroot setup), put `AllowUsers`
+*above* it — `Match` blocks scope settings to whatever follows them,
+and you don't want this one accidentally swallowed.
+
+### The safety habit
+
+Before restarting sshd, **open a second SSH session and leave it
+open.** If the new config is broken, that session stays alive and
+lets you fix it from inside. Then in a third terminal, test that a
+brand-new connection still works. Only close everything once the
+new connection succeeds.
+
+```
+sudo sshd -t                 # silence = good
+sudo systemctl restart ssh
+```
+
+`sshd -t` validates syntax without restarting. Run it religiously.
+A typo here is the difference between "five minutes of debugging" and
+"thirty minutes plus a screwdriver."
+
+## fail2ban
+
+Once passwords are off, brute-force is mathematically pointless.
+`fail2ban` makes it practically expensive — and keeps your `auth.log`
+clean, which is its own quiet pleasure.
+
+```
+sudo apt install -y fail2ban
+sudo nano /etc/fail2ban/jail.local
+```
+
+```ini
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+backend  = systemd
+
+[sshd]
+enabled = true
+port    = ssh
+```
+
+Important: the file is `jail.local`, not `jail.conf`. `jail.conf`
+gets overwritten on package upgrades; `.local` is for your overrides.
+
+```
+sudo systemctl restart fail2ban
+sudo systemctl enable fail2ban
+sudo fail2ban-client status sshd
+```
+
+Right after install you'll see zero bans. Come back in a week and
+look again — the list is always longer than I expect. It's a small
+window into how loud the public internet is.
+
+## The clients
+
+`my-file-server.yourdomain.com` is now a fully working SFTP endpoint, but every
+client still thinks it's pointing at `tonykrub.dynv6.net` with a
+password. The migration isn't done until the clients are updated.
+
+**FileZilla.** Site Manager → my Pi entry → host changes to the new
+hostname, Logon Type changes from "Normal" to **Key file**, point at
+`~/.ssh/id_ed25519`. If FileZilla offers to convert to its `.ppk`
+format, accept — it saves a converted copy alongside; the original
+is unchanged.
+
+**Android file manager.** Same story: change the host, switch
+authentication from password to private key, point at the key file.
+The cleanest practice is to generate a *separate* key on the phone
+itself rather than copying the laptop key over — that way if the
+phone is lost, you can revoke just that one key from
+`~/.ssh/authorized_keys` on the Pi without touching anything else.
+
+**iPhone.** I half-expected this to be the painful one. It wasn't.
+Both iOS file managers I tried supported SSH keys; one let me paste
+the private key text directly, the other wanted a file. Either way,
+five minutes.
+
+The first time I logged in from my phone on mobile data, with Wi-Fi
+off, and saw my Pi's filesystem appear — that was the closing
+moment of the migration.
+
+## What I'd do differently
+
+A few things only became obvious after they cost me time.
+
+**Check architecture and OS versions before reaching for `apt`.**
+Knowing that Bullseye is on LTS (and that backports is gone with it)
+would have saved a detour. `cat /etc/os-release` and
+`dpkg --print-architecture` take three seconds. They tell you which
+half of the internet's instructions actually apply to your machine.
+
+**Test in the foreground every time you touch the config.** Daemons
+hide errors; foreground runs print them. `-daemon=0 -debug -verbose
+-noquiet` is the incantation.
+
+**Suspect the cache.** Whenever a config change should have done
+something but didn't, `sudo rm -f /var/cache/ddclient/ddclient.cache`
+is the second thing to try, after re-reading the config.
+
+**Look at WAN IP before architecting around inbound IPv4.** If your
+router shows `100.64.x.x` to `100.127.x.x` on the WAN side, you're
+behind CGNAT and inbound IPv4 is not yours to give away. Knowing
+this before you've written and rewritten three IPv4 detection
+strategies is preferable to learning it after.
+
+**Redact tokens reflexively.** Set up the `sed` filter once, alias
+it, and never paste a raw debug log again. The cost of the habit is
+zero. The cost of forgetting is a token rotation, in the best case.
+
+## What the stack looks like now
+
+A quick diff of where I started and where I ended up:
+
+| Layer | Before | After |
+|---|---|---|
+| DDNS | `tonykrub.dynv6.net` (broken) | `my-file-server.yourdomain.com` on Cloudflare |
+| ddclient | 3.9.1 from apt | 3.11.2 from source, scoped API token |
+| IPv4 path | dynv6 (broken) | True DDNS bridge → wrapper script → Cloudflare A |
+| IPv6 path | absent | `wlan0` → Cloudflare AAAA |
+| SSH | password auth, any user | key-only, root disabled, user whitelist |
+| Brute-force defense | none | fail2ban (1h ban after 5 fails in 10 min) |
+| Clients | one app, password | three apps, key auth |
+
+The whole thing took an evening. It also took another evening to
+write down everything I learned along the way — which, on balance,
+might be the most valuable part. Five years from now when something
+in this stack breaks again, I'd rather have the playbook than the
+muscle memory.
+
+If this helped you escape a similar tangle, or if a step here is
+out of date by the time you read it, I'd love to know. The internet
+keeps quietly changing the locks on the doors it sold you. The least
+we can do is leave the next person a map.
