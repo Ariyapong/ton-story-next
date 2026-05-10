@@ -5,7 +5,7 @@ interface EyebrowProps {
   className?: string;
 }
 
-export function Eyebrow({ children, className }: EyebrowProps) {
+export function Eyebrow({ children, className }: Readonly<EyebrowProps>) {
   return (
     <div
       className={cn(

@@ -5,6 +5,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 
 import { Eyebrow } from "@/components/eyebrow";
+import { mdxComponents } from "@/components/mdx";
 import { getProjectBySlug, getProjectSlugs } from "@/lib/projects";
 import {
   LANGS,
@@ -137,6 +138,7 @@ export default async function ProjectPage({
         <div className="prose-editorial max-w-none">
           <MDXRemote
             source={project.content}
+            components={mdxComponents}
             options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
           />
         </div>

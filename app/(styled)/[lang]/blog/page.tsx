@@ -37,9 +37,9 @@ export async function generateMetadata({
 
 export default async function BlogPage({
   params,
-}: {
+}: Readonly<{
   params: Promise<Params>;
-}) {
+}>) {
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   const dict = getDict(lang);

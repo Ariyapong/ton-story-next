@@ -5,6 +5,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 
 import { Eyebrow } from "@/components/eyebrow";
+import { mdxComponents } from "@/components/mdx";
 import { ReadingProgress } from "@/components/reading-progress";
 import { getAdjacentPosts, getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { formatDateMono, formatReadingTime } from "@/lib/format";
@@ -64,9 +65,9 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({
   params,
-}: {
+}: Readonly<{
   params: Promise<Params>;
-}) {
+}>) {
   const { lang, slug } = await params;
   if (!isLang(lang)) notFound();
   const post = getPostBySlug(slug);
@@ -155,6 +156,7 @@ export default async function BlogPostPage({
           <div className="prose-editorial max-w-none" lang={post.lang}>
             <MDXRemote
               source={post.content}
+              components={mdxComponents}
               options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
             />
           </div>
@@ -239,12 +241,12 @@ function CopyLink({
   canonicalPath,
   copyLabel,
   copiedLabel,
-}: {
+}: Readonly<{
   slug: string;
   canonicalPath: string;
   copyLabel: string;
   copiedLabel: string;
-}) {
+}>) {
   const id = `copy-${slug}`;
   const safeCopied = copiedLabel.replace(/'/g, "\\'");
   const script = `(function(){var b=document.getElementById('${id}');if(!b)return;b.addEventListener('click',function(){var u=window.location.origin+'${canonicalPath}';if(navigator.clipboard){navigator.clipboard.writeText(u);}var t=b.querySelector('span');if(t){var o=t.textContent;t.textContent='${safeCopied}';setTimeout(function(){t.textContent=o;},1400);}});})();`;
