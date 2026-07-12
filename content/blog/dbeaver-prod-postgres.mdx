@@ -1,0 +1,302 @@
+---
+title: "I just wanted a database GUI"
+date: "2026-07-12"
+excerpt: "I wanted a database GUI for my link shortener. What I got was a lesson in what the app is actually for — and four ways I nearly broke production."
+tags: ["postgres", "dbeaver", "redis", "docker", "self-hosting", "ssh", "databases"]
+lang: "en"
+draft: true
+---
+
+I'm a frontend developer. I've spent years being comfortable in React and
+TypeScript and deeply *un*comfortable anywhere near a database. So when I
+finished self-hosting my own link shortener — Postgres, Redis, a VPS, the
+whole thing — I hit a wall that had nothing to do with code:
+
+I had no idea how to look inside my own database.
+
+The command line felt like a place where I'd break something irreversible by
+typing one wrong word. So I reached for the thing frontend people always reach
+for: a GUI. DBeaver. Point it at Postgres, click around, feel safe.
+
+What I expected was a fifteen-minute setup. What I got was a much more useful
+answer to a question I hadn't actually asked.
+
+## The premise was wrong
+
+Local development was, in fact, trivial. My dev Postgres already publishes a
+port, so DBeaver connected in about thirty seconds.
+
+Production was a different story, and the reason turned out to be the whole
+point. My production Postgres has **no published port at all** — it exists only
+on the Docker network, reachable by the app and nothing else. That was
+deliberate, written into the design months ago: a database on the public
+internet is how self-hosted projects die.
+
+So the question became: how do I safely get a GUI into a database I
+intentionally locked in a room with no doors?
+
+But before that, a better question was waiting. Here's the mental model I
+didn't have:
+
+> **Postgres is the truth. Redis is a fast copy of that truth. And the API is
+> the only thing that keeps the two in sync.**
+
+My redirect path doesn't read Postgres. It reads Redis, because a redirect
+should be fast. The database is only consulted on a cache miss, and the result
+gets cached for 24 hours. The API keeps this honest: every time it writes a
+link, it also deletes that link's cache entry.
+
+A GUI doesn't do that. A GUI writes to Postgres and tells Redis nothing.
+
+Which means if I open DBeaver, run this on production:
+
+```sql
+UPDATE links SET is_active = false WHERE slug = 'some-bad-link';
+```
+
+...I get a cheerful "1 row updated", I close my laptop, and **the link keeps
+redirecting for the next 24 hours.** Postgres says it's disabled. Redis is
+still happily sending everyone to the old destination. Nothing errors. Nothing
+warns me. I've done half an edit and felt the satisfaction of a whole one.
+
+That's the scenario that scares me, because it's the one where I'd think I'd
+killed an abusive link and walked away.
+
+So the actual rule isn't "GUI bad, terminal good." It's this:
+
+**Writes go through the app. The database tool is for looking.**
+
+The dashboard I already built validates the URL, enforces slug rules, and
+clears the cache. It isn't the lesser option compared to raw SQL — it's the
+*correct* one. And the corollary is the most useful thing I learned all day:
+
+> If I ever find myself wanting to hand-write SQL against production, that's
+> not a database task. That's a missing button in my app.
+
+## But I still wanted the keys
+
+I could have stopped there and used the GUI read-only forever. I didn't want
+to. If I only ever take the safe path, I never learn what the dangerous one
+actually does, and I'd rather learn it now — on a project where the worst case
+is *my* links break — than during an incident at work.
+
+So: full control, but with the genuinely irreversible mistakes made
+*structurally impossible* rather than merely discouraged.
+
+### Step 1: a door that only I can open
+
+I published Postgres to the droplet's **loopback address**, and only that:
+
+```yaml
+ports:
+  # Loopback ONLY — reachable solely from the droplet itself,
+  # i.e. through an SSH tunnel. Never widen this to "5432:5432".
+  - "127.0.0.1:5432:5432"
+```
+
+The difference between `127.0.0.1:5432:5432` and `5432:5432` is a handful of
+characters and the entire security posture of the project. The first is
+reachable only from the machine itself, which means only through SSH. The
+second publishes my database to the internet.
+
+DBeaver has SSH tunnelling built in, so it hops through the server as my deploy
+user and comes out on the inside. The verification is one command, and I now run
+it every time I touch this:
+
+```bash
+ss -tln | grep 5432
+# WANT:  127.0.0.1:5432
+# PANIC: 0.0.0.0:5432
+```
+
+### Step 2: two roles, not one
+
+This is the part I'd tell my past self about. In Postgres, "can change data" and
+"can change the schema" are *separate privileges*, and you can have one without
+the other.
+
+My schema is owned by migrations. If I hand-alter a table in a GUI, my migration
+history silently desyncs from reality, and the next deploy explodes in a way
+that's genuinely painful to unpick. That's the mistake with no cheap undo. Data
+mistakes, by contrast, are recoverable — that's what backups and transactions
+are for.
+
+So I made two roles that are neither of them the owner of anything:
+
+```sql
+-- read-only: my default, everyday connection
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO ponylink_ro;
+
+-- read-write DATA — but it owns nothing, so ALTER/DROP/TRUNCATE are refused
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ponylink_rw;
+```
+
+And one detail that is easy to miss and would have quietly broken everything
+later:
+
+```sql
+-- Future tables (every migration creates them as the owner) must be granted
+-- automatically, or both roles go blind after the next migration.
+ALTER DEFAULT PRIVILEGES FOR ROLE shortener IN SCHEMA public
+  GRANT SELECT ON TABLES TO ponylink_ro;
+```
+
+Without that, the roles can see today's tables and nothing I create tomorrow.
+
+Then I tried to break it, because a security control you haven't attacked is a
+security control you're merely hoping about:
+
+| What I tried | What Postgres said |
+| --- | --- |
+| read-only role → `INSERT` | `ERROR: permission denied for table links` |
+| write role → `UPDATE` | worked (then I rolled it back) |
+| write role → `ALTER TABLE` | `ERROR: must be owner of table links` |
+| write role → `DROP TABLE` | `ERROR: must be owner` |
+| write role → `TRUNCATE` | `ERROR: permission denied` |
+
+Full control over data. Zero ability to break the schema. The database enforces
+it, not my memory at 11pm.
+
+### Step 3: make the undo button the default
+
+Two connections in DBeaver: a calm blue read-only one, and a red one for writes.
+The red one has **auto-commit turned off**, which changes everything about how
+it feels to use.
+
+I run an `UPDATE`. It says "Updated Rows: 6". And **nothing is real yet.** The
+transaction is open. I look at that number — did I expect 6, or did I expect 1?
+— and then I choose: Commit, or Rollback.
+
+I tested it on production, deliberately: ran an update that touched all six of
+my links, watched it report six, hit Rollback, and watched it evaporate. That
+five seconds of "wait, six?!" is the entire value of the design. It's the
+difference between a mistake and an incident.
+
+## The four ways I nearly hurt myself
+
+Here's where I stop sounding competent. Everything above is the clean version.
+This is what actually happened.
+
+**1. I put passwords in a SQL file.** My first draft of the roles script had
+`PASSWORD 'REPLACE_ME'` placeholders, and I dutifully pasted my new passwords in.
+Which means the plaintext was now in a file, on the server, one careless `git add`
+from being permanent. The right tool exists and I didn't know it: psql's
+`\password` command prompts for the password, echoes nothing, and hashes it
+*client-side*, so the plaintext never reaches the file, the shell history, or the
+server log. Passwords do not belong in files you're about to pipe into a database.
+
+**2. I typed my password where the username goes.** `\password` takes the *role
+name* as its argument. I gave it the password. Postgres said `role "..." does not
+exist` — and in doing so, wrote my password into the server log as the text of a
+failed statement. It never became anyone's actual password, but it was now sitting
+in a log file. The only correct response is to treat it as burned and pick a new
+one, which stung a little for about ten seconds.
+
+**3. I got stuck in psql and couldn't get out.** My prompt had turned from
+`shortener=#` into `shortener-#` and every command I typed did nothing. The dash
+means psql is still waiting for you to finish a statement — it wants a semicolon.
+Also, psql's commands take a **backslash**: `\q` quits. I was typing `/quit`,
+which is just more text going into the query buffer. Ctrl+C clears it.
+
+**4. The one that could actually have taken the site down.** Stuck at that
+prompt, I typed a bare `\password` with no argument — and stopped there, luckily,
+because **`\password` with no argument changes the password of the role you're
+currently logged in as.** That was the superuser my API authenticates with. Had I
+completed it, the app's stored credentials would have instantly become wrong, and
+production would have started failing on its next reconnect. I'd have taken the
+site down not by deleting data, but by changing a password.
+
+Not one of these was a hard technical problem. They were all "you don't know the
+tool yet" problems, which is exactly what you get when you decide to learn
+something the hard way. Which was the point.
+
+## Two traps nobody warns you about
+
+**Production and localhost are both `127.0.0.1:5432`.**
+
+Read that again, because it took me a second. My local dev database listens on
+`127.0.0.1:5432`. My production tunnel *also* terminates at `127.0.0.1:5432` —
+that's how tunnels work. The address is identical. The only thing distinguishing
+"production" from "my laptop" is a checkbox in a GUI.
+
+The connection label is not proof. So the first query in my saved scripts is
+this one, and I run it whenever there's the slightest doubt:
+
+```sql
+SELECT current_user,
+       (SELECT count(*) FROM links) AS links,
+       (SELECT string_agg(email, ', ') FROM users) AS emails;
+```
+
+Production shows my real accounts. Local dev shows a lone `admin@local.test`.
+Data doesn't lie about where it lives; UI labels do.
+
+**Auto-commit off is a safety net that can strangle you.**
+
+This one I didn't see coming, and it's the sharpest edge in the whole setup.
+When I run that `UPDATE` and leave the transaction open, Postgres is holding
+**row locks** on those rows. I clicked Rollback within seconds. But if I'd run an
+update and then wandered off to lunch, those locks would stay held — and my API's
+own writes to those same rows would *block, waiting for me*. A human with a GUI
+and an open transaction is one of the classic ways to take down an app while
+doing nothing that looks wrong.
+
+The fix is to let the database end the standoff itself, and to apply it only to
+the human roles — never to the role the app uses:
+
+```sql
+ALTER ROLE ponylink_ro SET idle_in_transaction_session_timeout = '5min';
+ALTER ROLE ponylink_rw SET idle_in_transaction_session_timeout = '5min';
+ALTER ROLE ponylink_ro SET statement_timeout = '60s';
+ALTER ROLE ponylink_rw SET statement_timeout = '60s';
+```
+
+I tested this too — opened a transaction, held it, and watched Postgres
+terminate my connection and roll the whole thing back on its own:
+
+```
+FATAL:  terminating connection due to idle-in-transaction timeout
+```
+
+Exactly the behaviour I want if I ever walk away mid-edit.
+
+## The script that finishes the job
+
+Remember the cache. Every hand-written write to a link is only half an edit,
+because Redis still holds the old answer. So the other half is a script I now
+run from my laptop immediately after any manual change:
+
+```bash
+./scripts/cache-bust.sh some-bad-link
+```
+
+It SSHes in and deletes that slug's cache entries — exactly what the API would
+have done if I'd used the dashboard like a sensible person. It's a small script,
+and writing it was the moment the whole shape of this clicked: **I was
+hand-building the thing my app already does for free.**
+
+Which brings it back around.
+
+## What I'd tell myself three hours earlier
+
+I went in wanting a database GUI. I came out with something better: a clear idea
+of what a database GUI is *for*.
+
+It's a microscope, not a control panel. It's for answering questions — which
+links get clicked, where from, on what devices, who invited whom. Reading is
+always safe. Writing is what bites.
+
+And the instinct I had at the start — "I need to get better at SQL so I can fix
+things in the database" — is the wrong instinct, and I'd have carried it for
+years without noticing. The better one is almost its opposite:
+
+> The fact that I need to touch the database by hand *is the bug*.
+
+Every time I want to reach for production SQL, the real answer is to go build
+the button in the app, where it's validated, repeatable, and cache-aware — and
+where the next person to need it (probably me, tired, in six months) can't get
+it wrong.
+
+The GUI is still there. It's blue, it's read-only, and it can't hurt me. The red
+one is there too, for the days I really do need it — and it can't hurt me
+*permanently*, which turns out to be the only kind of safety worth engineering.

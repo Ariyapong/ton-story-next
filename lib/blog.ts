@@ -12,6 +12,8 @@ export interface PostFrontmatter {
   excerpt?: string;
   tags?: string[];
   lang: Lang;
+  /** `draft: true` → visible in `next dev`, invisible in every production build. */
+  draft?: boolean;
 }
 
 export interface Post extends PostFrontmatter {
@@ -21,6 +23,12 @@ export interface Post extends PostFrontmatter {
 }
 
 const WORDS_PER_MIN = 220;
+
+// Drafts render locally so you can preview them, and vanish from production:
+// not in the blog list, the homepage, the sitemap, or "related" — and, because
+// getPostBySlug returns null, the URL itself 404s rather than being an unlisted
+// page someone can stumble onto.
+const SHOW_DRAFTS = process.env.NODE_ENV === "development";
 
 function readingTime(content: string) {
   // Count Latin word-ish tokens + Thai chars / 6 (rough but stable for mixed text).
@@ -35,8 +43,13 @@ function ensureDir() {
   return fs.readdirSync(BLOG_DIR).filter((file) => file.endsWith(".mdx") || file.endsWith(".md"));
 }
 
-export function getPostSlugs(): string[] {
+function slugsOnDisk(): string[] {
   return ensureDir().map((file) => file.replace(/\.mdx?$/, ""));
+}
+
+/** Publishable slugs only — this is what generateStaticParams pre-renders. */
+export function getPostSlugs(): string[] {
+  return getAllPosts().map((p) => p.slug);
 }
 
 export function getPostBySlug(slug: string): Post | null {
@@ -48,6 +61,8 @@ export function getPostBySlug(slug: string): Post | null {
   const { data, content } = matter(file);
   const fm = data as Partial<PostFrontmatter>;
 
+  if (fm.draft && !SHOW_DRAFTS) return null; // the single gate every caller inherits
+
   return {
     slug: realSlug,
     title: fm.title ?? realSlug,
@@ -55,13 +70,14 @@ export function getPostBySlug(slug: string): Post | null {
     excerpt: fm.excerpt,
     tags: fm.tags,
     lang: isLang(fm.lang) ? fm.lang : DEFAULT_LANG,
+    draft: fm.draft ?? false,
     content,
     readingTime: readingTime(content),
   };
 }
 
 export function getAllPosts(): Post[] {
-  return getPostSlugs()
+  return slugsOnDisk()
     .map((slug) => getPostBySlug(slug))
     .filter((p): p is Post => p !== null)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
